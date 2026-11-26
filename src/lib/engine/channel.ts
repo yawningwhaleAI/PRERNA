@@ -66,3 +66,32 @@ export function channelSwitchOnly(shg: ShgRecord, card: RateCard, opts: PriceOpt
   const bulk = sellingPrice(shg, shg.linkedAc, "Bulk", card, opts).sp;
   return online > shg.market && bulk <= shg.market ? "Bulk" : "Online";
 }
+
+export interface BulkDemandRow {
+  shgId: string;
+  product: string;
+  /** Units a month that must find bulk buyers (today's online volume). */
+  unitsNeeded: number;
+  /** Units from validated buyer commitments (LoI, PO, delivered, repeat). */
+  confirmed: number;
+  gap: number;
+}
+
+/**
+ * A channel switch is only real if bulk buyers exist. For every product the plan moves from online to bulk,
+ * compare the volume that must find bulk buyers with the volume confirmed in the order book.
+ */
+export function bulkDemandCheck(
+  shgs: ShgRecord[],
+  plan: Record<string, { channel: Channel }>,
+  committed: Map<string, number>,
+  volMult = 1,
+): BulkDemandRow[] {
+  return shgs
+    .filter((s) => s.channel === "Online" && plan[s.id]?.channel === "Bulk")
+    .map((s) => {
+      const unitsNeeded = s.units * volMult;
+      const confirmed = committed.get(s.id) ?? 0;
+      return { shgId: s.id, product: s.product, unitsNeeded, confirmed, gap: Math.max(0, unitsNeeded - confirmed) };
+    });
+}

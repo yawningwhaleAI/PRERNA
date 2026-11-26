@@ -25,18 +25,18 @@ export default function DataPage() {
   const exportScenario = () => {
     const sc = SCENARIOS.find((x) => x.id === state.scenario)!;
     downloadCsv(`prerna360_${sc.id}.csv`, [
-      ["Scenario", sc.short, "Levers", JSON.stringify(state.levers)],
-      ["SHG", "Product", "AC", "Channel", "SHG price", "Inbound", "Markup", "Outbound", "SP", "Market", "Headroom", "Competitive", "Units", "AC markup/month", "SHG income/month", "Logistics/month"],
+      ["Plan", sc.name, "Assumptions", JSON.stringify(state.levers)],
+      ["SHG", "Product", "Warehouse", "Sold", "SHG price", "Transport in", "Warehouse margin", "Delivery", "Selling price", "Market price", "Below market by", "Priced OK", "Units/month", "Warehouse earns/month", "Women earn/month", "Transport/month"],
       ...m.current.rows.map((r) => [r.shgId, r.product, r.ac, r.channel, r.shgPrice, r.inbound, r.markup, r.outbound, r.sp, r.market, r.headroomPct, r.competitive ? "Yes" : "No", r.units, r.markupRev, r.shgIncome, r.inboundSpend + r.outboundSpend]),
     ]);
   };
 
   return (
     <div>
-      <PageHeader title="Data" question="Where every number comes from: the case dataset, the rate card, analyst classifications and data-quality checks.">
+      <PageHeader title="Data & sources" question="Where every number comes from: the case data, the transport rates, analyst labels and data checks.">
         <div className="flex gap-2">
-          <button className="btn btn-primary" onClick={exportScenario}>Export {state.scenario} as CSV</button>
-          <button className="btn" onClick={() => { if (window.confirm("Clear all inputs saved in this browser (levers, overrides, opex, buyers, boxes, commitments)?")) resetAll(); }}>
+          <button className="btn btn-primary" onClick={exportScenario}>Download this plan (CSV)</button>
+          <button className="btn" onClick={() => { if (window.confirm("Clear everything saved in this browser (assumptions, warehouse choices, costs, buyers, boxes, orders)?")) resetAll(); }}>
             Reset saved inputs
           </button>
         </div>
@@ -50,14 +50,14 @@ export default function DataPage() {
               <tr><td>Dataset SHA-256 (checked in CI)</td><td className="font-mono text-[11px] whitespace-normal">{CASE.source.datasetSha256}</td></tr>
               <tr><td>Analyst attributes</td><td className="whitespace-normal">{CASE.source.attributes}</td></tr>
               <tr><td>Calculation engine</td><td className="whitespace-normal">Pure TypeScript port of context/prerna_model.py; golden tests and parity against context/reference_outputs pass in CI.</td></tr>
-              <tr><td>Saved inputs</td><td className="whitespace-normal">Opex, capacity, buyers, boxes, commitments, overrides and levers are kept in this browser only (prototype).</td></tr>
+              <tr><td>Saved inputs</td><td className="whitespace-normal">Costs, capacity, buyers, boxes, orders, warehouse choices and assumptions are kept in this browser only (prototype).</td></tr>
             </tbody>
           </table>
         </TableWrap>
         <Note>{CASE.source.note} Members are held as counts per SHG; no names, phone, Aadhaar or bank fields exist anywhere in the app.</Note>
       </Section>
 
-      <Section title="Data-quality checks">
+      <Section title="Data checks">
         <TableWrap>
           <table className="tbl">
             <thead><tr><th>Rule</th><th>Level</th><th>Result</th><th>Detail</th></tr></thead>
@@ -75,27 +75,27 @@ export default function DataPage() {
         </TableWrap>
       </Section>
 
-      <Section title="Rate card v1 (case)">
+      <Section title="Transport rates and margin (from the case)">
         <TableWrap>
           <table className="tbl max-w-2xl">
             <thead><tr><th>Item</th><th className="r">Value</th><th>Unit</th></tr></thead>
             <tbody>
               {card.bands.map((b, i) => (
                 <tr key={i}>
-                  <td>Inbound, {b.upToKm === null ? `above ${card.bands[i - 1]?.upToKm} km` : `${i === 0 ? "0" : (card.bands[i - 1]?.upToKm ?? 0) + 1}–${b.upToKm} km`}</td>
+                  <td>Transport to warehouse, {b.upToKm === null ? `above ${card.bands[i - 1]?.upToKm} km` : `${i === 0 ? "0" : (card.bands[i - 1]?.upToKm ?? 0) + 1}–${b.upToKm} km`}</td>
                   <td className="r">{inr(b.ratePerKg)}</td><td>per kg</td>
                 </tr>
               ))}
               <tr><td>Online courier, first kg</td><td className="r">{inr(card.onlineFirstKg)}</td><td>per order (1 unit = 1 order)</td></tr>
               <tr><td>Online courier, each extra kg or part</td><td className="r">{inr(card.onlineExtraKg)}</td><td>per kg</td></tr>
               <tr><td>Bulk, shared truck</td><td className="r">{inr(card.bulkPerKg)}</td><td>per kg</td></tr>
-              <tr><td>AC markup</td><td className="r">{num(card.markup * 100)}%</td><td>of SHG price</td></tr>
+              <tr><td>Warehouse margin</td><td className="r">{num(card.markup * 100)}%</td><td>of SHG price</td></tr>
             </tbody>
           </table>
         </TableWrap>
       </Section>
 
-      <Section title="Case dataset: SHG Data (20 SHGs, 13 districts)">
+      <Section title={`Case data: ${CASE.shgs.length} SHGs, unchanged`}>
         <TableWrap>
           <table className="tbl">
             <thead>
@@ -113,7 +113,7 @@ export default function DataPage() {
         </TableWrap>
       </Section>
 
-      <Section title="Analyst classification (not in the case)">
+      <Section title="Analyst labels (not in the case)">
         <TableWrap>
           <table className="tbl">
             <thead><tr><th>SHG</th><th>Product</th><th>Group</th><th>Brand tier</th><th>Category</th><th>ODOP / GI link (verify eligibility)</th></tr></thead>

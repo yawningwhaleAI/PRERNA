@@ -75,11 +75,11 @@ export function HeadroomChart({ rows }: { rows: { label: string; headroom: numbe
 export function Waterfall({ shgPrice, inbound, markup, outbound, sp, market }: { shgPrice: number; inbound: number; markup: number; outbound: number; sp: number; market: number }) {
   const steps = [
     { name: "SHG price", base: 0, value: shgPrice, color: C.comp[0] },
-    { name: "Inbound", base: shgPrice, value: inbound, color: C.comp[1] },
-    { name: "AC markup", base: shgPrice + inbound, value: markup, color: C.comp[2] },
-    { name: "Outbound", base: shgPrice + inbound + markup, value: outbound, color: C.comp[3] },
+    { name: "Transport in", base: shgPrice, value: inbound, color: C.comp[1] },
+    { name: "Warehouse margin", base: shgPrice + inbound, value: markup, color: C.comp[2] },
+    { name: "Delivery", base: shgPrice + inbound + markup, value: outbound, color: C.comp[3] },
     { name: "Selling price", base: 0, value: sp, color: sp > market ? C.bad : C.good },
-    { name: "Market", base: 0, value: market, color: C.axis },
+    { name: "Market price", base: 0, value: market, color: C.axis },
   ];
   return (
     <div className="h-[280px] w-full">
@@ -88,7 +88,7 @@ export function Waterfall({ shgPrice, inbound, markup, outbound, sp, market }: {
           <CartesianGrid vertical={false} stroke={C.grid} />
           <XAxis dataKey="name" tick={{ fontSize: 11, fill: C.text }} stroke={C.grid} interval={0} />
           <YAxis tickFormatter={(v) => inr(v)} tick={{ fontSize: 11, fill: C.axis }} stroke={C.grid} width={64} />
-          <Tooltip contentStyle={tipStyle} cursor={{ fill: "#E9EEF4" }} formatter={(v, n) => (n === "base" ? [null, null] : [inr(Number(v), 2), "₹ per unit"])} />
+          <Tooltip contentStyle={tipStyle} cursor={{ fill: "#E9EEF4" }} formatter={(v, n) => (n === "base" ? [null, null] : [inr(Number(v), 2), "per unit"])} />
           <ReferenceLine y={market} stroke={C.axis} strokeDasharray="4 3" />
           <Bar dataKey="base" stackId="a" fill="transparent" isAnimationActive={false} />
           <Bar dataKey="value" stackId="a" radius={[4, 4, 0, 0]} isAnimationActive={false}>

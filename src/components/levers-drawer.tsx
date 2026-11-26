@@ -17,15 +17,15 @@ export function LeversDrawer({ open, onClose }: { open: boolean; onClose: () => 
       <aside
         className="h-full w-full max-w-md overflow-y-auto bg-white p-5 shadow-xl"
         onClick={(e) => e.stopPropagation()}
-        aria-label="Analyst levers"
+        aria-label="Assumptions"
       >
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-lg font-bold text-navy">Analyst levers</h2>
+          <h2 className="text-lg font-bold text-navy">Assumptions</h2>
           <button className="btn" onClick={onClose}>Close</button>
         </div>
         <p className="mb-4 text-xs text-grey">
-          Defaults reproduce the reference model. Changing a lever re-derives hub and channel decisions on every screen.
-          Stress tests on the Scenarios page keep the S3 plan fixed and shock it.
+          These settings sit behind the numbers. The defaults match the case and the research. Change one to test &quot;what if&quot;: every page,
+          including which warehouse and channel is recommended, updates straight away. Orange = changed from the default.
         </p>
         <div className="space-y-3">
           {LEVER_META.map((m) => {
@@ -75,7 +75,7 @@ export function LeversDrawer({ open, onClose }: { open: boolean; onClose: () => 
           })}
         </div>
         <button className="btn btn-primary mt-4 w-full" onClick={resetLevers}>
-          Reset all levers to defaults
+          Reset all to defaults
         </button>
       </aside>
     </div>

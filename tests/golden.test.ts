@@ -5,6 +5,7 @@ import {
   DEFAULT_LEVERS,
   allocateAll,
   buildPlan,
+  bulkDemandCheck,
   evaluateScenario,
   headroomSharing,
   inclusionVolumeTest,
@@ -132,5 +133,18 @@ describe("Band-edge lever", () => {
     expect(sp > shg("SHG-14").market).toBe(true);
     const s1 = evaluateScenario("S1", D, { ...L, edgeInclusive: false });
     expect(s1.summary.uncompetitive).toContain("SHG-14");
+  });
+});
+
+describe("Bulk demand check (Excel Channel sheet: new bulk units per month)", () => {
+  it("recommended plan moves 5 products to bulk = 2,250 units a month needing bulk buyers", () => {
+    const rows = bulkDemandCheck(D.shgs, buildPlan("S3", D, L), new Map());
+    expect(rows.map((r) => r.shgId)).toEqual(["SHG-01", "SHG-05", "SHG-06", "SHG-09", "SHG-16"]);
+    expect(rows.reduce((t, r) => t + r.unitsNeeded, 0)).toBe(2250);
+    expect(rows.every((r) => r.gap === r.unitsNeeded)).toBe(true);
+  });
+  it("confirmed orders reduce the gap", () => {
+    const rows = bulkDemandCheck(D.shgs, buildPlan("S3", D, L), new Map([["SHG-16", 100]]));
+    expect(rows.find((r) => r.shgId === "SHG-16")!.gap).toBe(50);
   });
 });

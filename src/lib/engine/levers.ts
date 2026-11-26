@@ -26,17 +26,17 @@ export interface LeverMeta {
 }
 
 export const LEVER_META: LeverMeta[] = [
-  { key: "edgeInclusive", label: "Band edge counts in the lower band", unit: "flag", assumption: true, note: "A2. Case wording '101–300'. Off: SHG-14 turns uncompetitive online at Lucknow." },
-  { key: "inboundRateChange", label: "Change in inbound rates", unit: "pct", assumption: false, note: "Stress test. 0% = case rate card." },
-  { key: "outboundRateChange", label: "Change in outbound rates", unit: "pct", assumption: false, note: "Stress test. 0% = case rate card." },
-  { key: "volumeChange", label: "Change in monthly volume", unit: "pct", assumption: false, note: "Stress test. 0% = case volumes." },
-  { key: "packagingPerBox", label: "Packaging cost per gift box", unit: "inr", assumption: true, note: "A16. No quote available; tested at ₹0–80." },
-  { key: "boxesPerOrder", label: "Boxes per corporate order", unit: "count", assumption: true, note: "Illustrative order size, not a forecast." },
-  { key: "headroomTrigger", label: "Headroom above which D2C price may rise", unit: "pct", assumption: true, note: "A10. Keeps a buffer below market." },
-  { key: "headroomTargetSpPctMarket", label: "Target SP after rise (% of market)", unit: "pct", assumption: true, note: "A10. SP set at 90% of market." },
-  { key: "thinHeadroom", label: "Thin headroom threshold", unit: "pct", assumption: true, note: "Flag products within 5% of market." },
-  { key: "participationTarget", label: "Participation target per SHG", unit: "pct", assumption: true, note: "Inclusion test, illustrative target." },
+  { key: "inboundRateChange", label: "Change in transport rates to the warehouse", unit: "pct", assumption: false, note: "Test what happens if trucking to the warehouse gets dearer. 0% = case rates." },
+  { key: "outboundRateChange", label: "Change in courier and truck rates to buyers", unit: "pct", assumption: false, note: "Test what happens if delivery gets dearer. 0% = case rates." },
+  { key: "volumeChange", label: "Change in units sold", unit: "pct", assumption: false, note: "Test a drop or rise in sales. 0% = case volumes." },
+  { key: "packagingPerBox", label: "Packaging cost per gift box", unit: "inr", assumption: true, note: "No quote yet; the research tested ₹0–80." },
+  { key: "boxesPerOrder", label: "Boxes in one corporate order", unit: "count", assumption: true, note: "Example order size, not a forecast." },
+  { key: "headroomTrigger", label: "Price rise allowed if a product is this far below market", unit: "pct", assumption: true, note: "Keeps a safety buffer below market." },
+  { key: "headroomTargetSpPctMarket", label: "…and the new price stays at this share of market", unit: "pct", assumption: true, note: "e.g. 90% = still 10% cheaper than market." },
+  { key: "thinHeadroom", label: "Warn when a product is less than this far below market", unit: "pct", assumption: true, note: "Products this close to market can tip over with small cost rises." },
+  { key: "participationTarget", label: "Target share of members earning in each SHG", unit: "pct", assumption: true, note: "Used for the inclusion test; illustrative." },
   { key: "prernaStores", label: "Prerna Saras stores in UP", unit: "count", assumption: false, note: "Business Standard, 16 Sep 2026." },
-  { key: "minWageYardstick", label: "UP minimum wage, unskilled (yardstick)", unit: "inr", assumption: false, note: "UP notification Oct 2026 – Mar 2027." },
+  { key: "minWageYardstick", label: "UP minimum wage, unskilled worker (₹ a month)", unit: "inr", assumption: false, note: "UP notification Oct 2026 – Mar 2027; used only as a yardstick." },
   { key: "lakhpatiMonthly", label: "Lakhpati Didi average monthly income", unit: "inr", assumption: false, note: "MoRD definition (household income)." },
+  { key: "edgeInclusive", label: "A distance of exactly 100/300/500 km pays the lower rate", unit: "flag", assumption: true, note: "How the case wording '101–300 km' is read. Untick to test the other reading: the Varanasi wooden toys (SHG-14) then cost more than market online." },
 ];

@@ -1,17 +1,17 @@
 "use client";
 
 import clsx from "clsx";
-import { Kpi, Loading, Note, PageHeader, Pill, Section, TableWrap } from "@/components/ui";
+import { HowTo, Kpi, Loading, Note, PageHeader, Pill, Section, TableWrap } from "@/components/ui";
 import { acVolumes, type AcName } from "@/lib/engine";
-import { inr, num, pct } from "@/lib/format";
-import { CASE, useModel } from "@/lib/model";
+import { inr, num, signedPct } from "@/lib/format";
+import { useModel } from "@/lib/model";
 import { useStore } from "@/lib/store";
 
-export default function Allocation() {
+export default function WarehouseLinks() {
   const { state, set, hydrated } = useStore();
   const m = useModel();
   if (!hydrated) return <Loading />;
-  const plan = m.results.S1.plan; // hub rule + what-if overrides
+  const plan = m.results.S1.plan; // recommended warehouse per SHG, including any manual choice
   const vol = 1 + state.levers.volumeChange;
   const before = acVolumes(m.data.shgs, (s) => s.linkedAc, vol);
   const after = acVolumes(m.data.shgs, (s) => plan[s.id]!.ac, vol);
@@ -19,63 +19,62 @@ export default function Allocation() {
     const chosen = plan[a.shgId]!.ac;
     const inbAt = (ac: AcName) => (ac === "Bijnor" ? a.inboundBijnor : a.inboundLucknow);
     const savingUnit = inbAt(a.linkedAc) - inbAt(chosen);
-    return { ...a, chosen, overridden: state.acOverrides[a.shgId] !== undefined, savingUnit, savingMonth: savingUnit * a.units };
+    return { ...a, chosen, manual: state.acOverrides[a.shgId] !== undefined, savingUnit, savingMonth: savingUnit * a.units };
   });
-  const relinks = rows.filter((r) => r.chosen !== r.linkedAc);
+  const moves = rows.filter((r) => r.chosen !== r.linkedAc);
   const saving = rows.reduce((t, r) => t + r.savingMonth, 0);
-  const setOverride = (id: string, ac: AcName, hubAc: AcName) =>
+  const choose = (id: string, ac: AcName, recommended: AcName) =>
     set("acOverrides", (o) => {
       const n = { ...o };
-      if (ac === hubAc) delete n[id];
+      if (ac === recommended) delete n[id];
       else n[id] = ac;
       return n;
     });
+  const manualCount = Object.keys(state.acOverrides).length;
 
   return (
     <div>
-      <PageHeader title="Allocation" question="Is each SHG linked to the right AC? Decided on tariff bands, not kilometres.">
-        {Object.keys(state.acOverrides).length > 0 && (
-          <button className="btn" onClick={() => set("acOverrides", {})}>Clear what-if overrides ({Object.keys(state.acOverrides).length})</button>
-        )}
+      <PageHeader title="Warehouse links" question="Which warehouse should each SHG send its goods to?">
+        {manualCount > 0 && <button className="btn" onClick={() => set("acOverrides", {})}>Undo my changes ({manualCount})</button>}
       </PageHeader>
 
+      <HowTo
+        steps={[
+          <>Transport to the warehouse is charged by <b>distance band</b> (per kg), not per kilometre. Each SHG should use the warehouse in the <b>cheaper band</b>.</>,
+          <>The <b>Recommended</b> column applies that rule. If both warehouses cost the same, the SHG <b>stays where it is</b> (no disruption for no saving).</>,
+          <>Want to test a different choice? Change <b>Your choice</b> for any SHG. Every page (prices, plans, finances) updates. Use <b>Undo my changes</b> to go back.</>,
+        ]}
+      />
+
       <div className="mb-6 grid grid-cols-2 gap-2.5 md:grid-cols-4">
-        <Kpi label="SHGs re-linked" value={num(relinks.length)} sub={relinks.map((r) => r.shgId.replace("SHG-", "")).join(", ") || "none"} />
-        <Kpi label="Inbound saving" value={inr(saving)} sub="per month vs today's links" alert={saving < 0} />
+        <Kpi label="SHGs that should move" value={num(moves.length)} sub={moves.map((r) => r.shgId.replace("SHG-", "")).join(", ") || "none"} />
+        <Kpi label="Transport saved" value={inr(saving)} sub="per month, vs today's links" alert={saving < 0} />
         {after.map((a, i) => (
           <Kpi
             key={a.ac}
-            label={`${a.ac} after re-linking`}
+            label={`${a.ac} after the moves`}
             value={`${num(a.shgs)} SHGs`}
-            sub={`${num(a.units)} units (${pct(a.units / before[i]!.units - 1, 0)}) · ${num(a.kg)} kg (${pct(a.kg / before[i]!.kg - 1, 0)})`}
+            sub={`${num(a.units)} units (${signedPct(a.units / before[i]!.units - 1)}) · ${num(a.kg)} kg (${signedPct(a.kg / before[i]!.kg - 1)}) vs today`}
           />
         ))}
       </div>
 
-      <Section
-        title="SHG-to-AC allocation"
-        note="Hub rule: link each SHG to the AC with the lower inbound band; on a tie keep the current link. Use 'What-if AC' to override any SHG: the override flows into S1 and S3 on every screen."
-      >
+      <Section title="Each SHG: transport cost per unit at each warehouse">
         <TableWrap>
           <table className="tbl">
             <thead>
               <tr>
                 <th>SHG</th>
                 <th>District</th>
-                <th>Linked now</th>
-                <th className="r">km Bijnor</th>
-                <th className="r">km Lucknow</th>
-                <th className="r">₹/kg Bijnor</th>
-                <th className="r">₹/kg Lucknow</th>
-                <th className="r">Inbound Bijnor</th>
-                <th className="r">Inbound Lucknow</th>
-                <th>Cheapest</th>
-                <th>Hub rule</th>
-                <th>What-if AC</th>
-                <th className="r">Saving / unit</th>
-                <th className="r">Units</th>
-                <th className="r">Saving / month</th>
-                <th>Flags</th>
+                <th>Today</th>
+                <th className="r">Via Bijnor</th>
+                <th className="r">Via Lucknow</th>
+                <th>Recommended</th>
+                <th>Your choice</th>
+                <th className="r">Saved / unit</th>
+                <th className="r">Units / month</th>
+                <th className="r">Saved / month</th>
+                <th>Notes</th>
               </tr>
             </thead>
             <tbody>
@@ -84,41 +83,39 @@ export default function Allocation() {
                   <td className="font-semibold">{r.shgId}</td>
                   <td>{r.district}</td>
                   <td>{r.linkedAc}</td>
-                  <td className="r tabular-nums">{num(r.kmBijnor)}</td>
-                  <td className="r tabular-nums">{num(r.kmLucknow)}</td>
-                  <td className="r tabular-nums">{inr(r.rateBijnor, r.rateBijnor % 1 ? 1 : 0)}</td>
-                  <td className="r tabular-nums">{inr(r.rateLucknow, r.rateLucknow % 1 ? 1 : 0)}</td>
-                  <td className="r tabular-nums">{inr(r.inboundBijnor, 1)}</td>
-                  <td className="r tabular-nums">{inr(r.inboundLucknow, 1)}</td>
-                  <td>{r.cheapestAc}</td>
-                  <td>{r.proposedAc}</td>
+                  <td className={clsx("r tabular-nums", r.proposedAc === "Bijnor" && "font-semibold")}>
+                    {inr(r.inboundBijnor, r.inboundBijnor % 1 ? 1 : 0)} <div className="text-[10.5px] text-grey">{num(r.kmBijnor)} km · {inr(r.rateBijnor, r.rateBijnor % 1 ? 1 : 0)}/kg</div>
+                  </td>
+                  <td className={clsx("r tabular-nums", r.proposedAc === "Lucknow" && "font-semibold")}>
+                    {inr(r.inboundLucknow, r.inboundLucknow % 1 ? 1 : 0)} <div className="text-[10.5px] text-grey">{num(r.kmLucknow)} km · {inr(r.rateLucknow, r.rateLucknow % 1 ? 1 : 0)}/kg</div>
+                  </td>
+                  <td>{r.proposedAc}{r.cheapestAc === "Tie" && <div className="text-[10.5px] text-grey">same cost, stays</div>}</td>
                   <td>
                     <select
-                      aria-label={`What-if AC for ${r.shgId}`}
-                      className={clsx("field py-0.5", r.overridden && "border-orange font-semibold text-orange")}
+                      aria-label={`Your choice of warehouse for ${r.shgId}`}
+                      className={clsx("field py-0.5", r.manual && "border-orange font-semibold text-orange")}
                       value={r.chosen}
-                      onChange={(e) => setOverride(r.shgId, e.target.value as AcName, r.proposedAc)}
+                      onChange={(e) => choose(r.shgId, e.target.value as AcName, r.proposedAc)}
                     >
                       <option>Bijnor</option>
                       <option>Lucknow</option>
                     </select>
                   </td>
-                  <td className={clsx("r tabular-nums", r.savingUnit < 0 && "above-market")}>{inr(r.savingUnit, 1)}</td>
+                  <td className={clsx("r tabular-nums", r.savingUnit < 0 && "above-market")}>{inr(r.savingUnit, r.savingUnit % 1 ? 1 : 0)}</td>
                   <td className="r tabular-nums">{num(r.units)}</td>
                   <td className={clsx("r tabular-nums", r.savingMonth < 0 && "above-market")}>{inr(r.savingMonth)}</td>
-                  <td className="space-x-1">
-                    {r.chosen !== r.linkedAc && <Pill>Re-link</Pill>}
-                    {r.overridden && <Pill tone="orange">What-if</Pill>}
-                    {r.closerSameBand && <Pill tone="grey">Closer AC, same band</Pill>}
-                    {r.bandEdgeWarning && <Pill tone="grey">Band edge ±10 km</Pill>}
+                  <td className="min-w-[150px] space-y-0.5 whitespace-normal [&>span]:mr-1">
+                    {r.chosen !== r.linkedAc && <Pill>Move</Pill>}
+                    {r.manual && <Pill tone="orange">Your change</Pill>}
+                    {r.closerSameBand && <Pill tone="grey">Closer, but same cost</Pill>}
+                    {r.bandEdgeWarning && <Pill tone="grey">Check road distance</Pill>}
                   </td>
                 </tr>
               ))}
             </tbody>
             <tfoot>
               <tr>
-                <td colSpan={12}>Total ({relinks.length} re-linked)</td>
-                <td />
+                <td colSpan={8}>Total ({moves.length} SHGs move)</td>
                 <td className="r tabular-nums">{num(rows.reduce((t, r) => t + r.units, 0))}</td>
                 <td className="r tabular-nums">{inr(saving)}</td>
                 <td />
@@ -127,25 +124,25 @@ export default function Allocation() {
           </table>
         </TableWrap>
         <Note>
-          Proximity is not savings: an SHG closer to the other AC but in the same band (Jhansi) saves nothing by moving, so the tie rule keeps it where it is.
-          Lucknow capacity is not in the case: confirm it before re-linking ({CASE.shgs.length} SHGs in scope).
+          &quot;Closer, but same cost&quot;: the Jhansi SHGs are nearer to Lucknow but pay the same band rate to either warehouse, so moving them saves nothing.
+          &quot;Check road distance&quot;: the distance is within 10 km of a band boundary, so the real road distance decides the rate.
+          Confirm Lucknow has room before moving SHGs: its volume rises sharply (see below).
         </Note>
       </Section>
 
-      <Section title="Volume at each AC, before and after">
+      <Section title="Volume at each warehouse, today vs after the moves">
         <TableWrap>
-          <table className="tbl">
+          <table className="tbl max-w-4xl">
             <thead>
               <tr>
-                <th>AC</th>
-                <th className="r">SHGs now</th>
+                <th>Warehouse</th>
+                <th className="r">SHGs today</th>
                 <th className="r">SHGs after</th>
-                <th className="r">Units now</th>
+                <th className="r">Units today</th>
                 <th className="r">Units after</th>
-                <th className="r">Change</th>
-                <th className="r">kg now</th>
-                <th className="r">kg after</th>
-                <th className="r">Change</th>
+                <th className="r">Kg today</th>
+                <th className="r">Kg after</th>
+                <th className="r">Change in kg</th>
               </tr>
             </thead>
             <tbody>
@@ -158,10 +155,9 @@ export default function Allocation() {
                     <td className="r">{num(a.shgs)}</td>
                     <td className="r tabular-nums">{num(b.units)}</td>
                     <td className="r tabular-nums">{num(a.units)}</td>
-                    <td className="r tabular-nums">{pct(a.units / b.units - 1)}</td>
                     <td className="r tabular-nums">{num(b.kg)}</td>
                     <td className="r tabular-nums">{num(a.kg)}</td>
-                    <td className="r tabular-nums">{pct(a.kg / b.kg - 1)}</td>
+                    <td className="r tabular-nums">{signedPct(a.kg / b.kg - 1)}</td>
                   </tr>
                 );
               })}

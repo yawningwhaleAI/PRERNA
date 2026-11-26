@@ -58,7 +58,7 @@ export interface BoxRejected {
  */
 export function priceBox(data: CaseData, items: BoxItemInput[], plan: Plan, levers: Levers): BoxPriced | BoxRejected {
   const live = items.filter((i) => i.qty > 0);
-  if (live.length === 0) return { ok: false, reason: "empty", message: "Add at least one SKU." };
+  if (live.length === 0) return { ok: false, reason: "empty", message: "Enter a quantity for at least one product to price a box." };
   const card = data.rateCard;
   const inMult = 1 + levers.inboundRateChange;
   const outMult = 1 + levers.outboundRateChange;
@@ -87,7 +87,7 @@ export function priceBox(data: CaseData, items: BoxItemInput[], plan: Plan, leve
     return {
       ok: false,
       reason: "mixed-ac",
-      message: "Mixed-AC box blocked: every SKU in a box must ship from the same AC (no cross-AC freight).",
+      message: "Mixed-AC box blocked: all products in a box must come from the same warehouse (no shipping between Bijnor and Lucknow).",
       acs: lines.map((l) => ({ shgId: l.shgId, ac: l.ac })),
     };
   }

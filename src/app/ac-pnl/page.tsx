@@ -1,9 +1,9 @@
 "use client";
 
 import clsx from "clsx";
-import { Loading, Note, PageHeader, Section, TableWrap, ToCollect } from "@/components/ui";
+import { HowTo, Loading, Note, PageHeader, Section, TableWrap, ToCollect } from "@/components/ui";
 import { FIXED_COST_LINES, VARIABLE_COST_LINES, workingCapital, type AcName, type AcPnl } from "@/lib/engine";
-import { inr, num, toPaise } from "@/lib/format";
+import { inr, num, pct, toPaise } from "@/lib/format";
 import { useModel } from "@/lib/model";
 import { useStore } from "@/lib/store";
 
@@ -14,7 +14,7 @@ export default function AcPnlPage() {
   const m = useModel();
   if (!hydrated) return <Loading />;
   const cols: { key: string; p: AcPnl }[] = [];
-  for (const sc of ["S0", "S3"] as const) for (const ac of ACS) cols.push({ key: `${ac} ${sc}`, p: m.pnl(sc, ac) });
+  for (const sc of ["S0", "S3"] as const) for (const ac of ACS) cols.push({ key: `${ac}, ${sc === "S0" ? "today" : "recommended"}`, p: m.pnl(sc, ac) });
 
   const setCost = (ac: AcName, kind: "variable" | "fixed", line: string, raw: string) =>
     set("opex", (o) => ({
@@ -41,49 +41,57 @@ export default function AcPnlPage() {
 
   return (
     <div>
-      <PageHeader title="AC P&L" question="Is each AC viable? AC income, the costs UPSRLM must collect, break-even and working capital." />
+      <PageHeader title="Warehouse finances" question="Does each warehouse earn enough to cover its costs? Today vs the recommended plan." />
+
+      <HowTo
+        steps={[
+          <>Each warehouse earns {pct(m.data.rateCard.markup, 0)} of the SHG price on every unit it sells. Transport is paid by the buyer, so it is not income.</>,
+          <><b>Warehouse managers:</b> type your real monthly costs in the right-hand table (rent, salaries, packaging…). Leave a line blank if you don&apos;t know it yet: the app never guesses.</>,
+          <>Once costs are in, the left table shows the monthly <b>profit or loss</b> and how many units the warehouse must sell to <b>break even</b>.</>,
+        ]}
+      />
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
-        <Section title="AC P&L, ₹ per month" note="Logistics is a pass-through recovered in the price. Viability rests on secure markup (products at or below market). Costs are not in the case.">
+        <Section title="Income and costs, ₹ per month" note="Safe income counts only products priced at or below market: it is what a warehouse can rely on. Costs are not in the case data.">
           <TableWrap>
             <table className="tbl">
               <thead>
                 <tr><th>₹ per month</th>{cols.map((c) => <th key={c.key} className="r">{c.key}</th>)}</tr>
               </thead>
               <tbody>
-                {row("Linked SHGs", (p) => num(p.shgs))}
+                {row("SHGs linked", (p) => num(p.shgs))}
                 {row("Units sold", (p) => num(p.units))}
-                {row("kg handled", (p) => num(p.kg))}
-                {row("Sales value at selling price (GMV)", (p) => inr(p.gmv))}
-                {row("less: payments to SHGs", (p) => inr(p.shgPayments))}
-                {row("less: logistics paid (recovered in price)", (p) => inr(p.logistics))}
-                {row("AC markup, all products", (p) => inr(p.markup))}
-                {row("AC markup, secure (competitive only)", (p) => <b>{inr(p.markupSecure)}</b>)}
+                {row("Kg handled", (p) => num(p.kg))}
+                {row("Sales value (what buyers pay)", (p) => inr(p.gmv))}
+                {row("less: paid to SHGs", (p) => inr(p.shgPayments))}
+                {row("less: transport (charged to buyers)", (p) => inr(p.logistics))}
+                {row("Warehouse income, all products", (p) => inr(p.markup))}
+                {row("Safe income (products priced OK)", (p) => <b>{inr(p.markupSecure)}</b>)}
                 {row("less: variable costs", (p) => (p.variableEntered ? inr(p.variableCosts) : <ToCollect />))}
-                {row("Contribution", (p) => <b>{inr(p.contribution)}</b>)}
+                {row("Left after variable costs", (p) => <b>{inr(p.contribution)}</b>)}
                 {row("less: fixed costs", (p) => (p.fixedCosts === null ? <ToCollect /> : inr(p.fixedCosts)))}
-                {row("Operating result", (p) =>
-                  p.operatingResult === null ? <ToCollect>opex needed</ToCollect> : <b className={clsx(p.operatingResult < 0 && "text-orange")}>{inr(p.operatingResult)}</b>,
+                {row("Monthly profit or loss", (p) =>
+                  p.operatingResult === null ? <ToCollect>costs needed</ToCollect> : <b className={clsx(p.operatingResult < 0 && "text-orange")}>{inr(p.operatingResult)}</b>,
                 )}
-                {row("Break-even units per month", (p) =>
-                  p.breakEvenUnits === null ? <ToCollect>opex needed</ToCollect> : Number.isFinite(p.breakEvenUnits) ? num(p.breakEvenUnits) : "not reachable",
+                {row("Units needed to break even", (p) =>
+                  p.breakEvenUnits === null ? <ToCollect>costs needed</ToCollect> : Number.isFinite(p.breakEvenUnits) ? num(p.breakEvenUnits) : "not reachable",
                 )}
-                {row("Opex coverage (contribution ÷ fixed)", (p) => (p.opexCoverage === null ? <ToCollect>opex needed</ToCollect> : `${p.opexCoverage.toFixed(2)}×`))}
-                {row("Secure markup in minimum-wage staff salaries", (p) => num(p.staffYardstick, 1))}
+                {row("Covers fixed costs how many times?", (p) => (p.opexCoverage === null ? <ToCollect>costs needed</ToCollect> : `${p.opexCoverage.toFixed(2)}×`))}
+                {row("Safe income = how many minimum-wage salaries", (p) => num(p.staffYardstick, 1))}
               </tbody>
             </table>
           </TableWrap>
           <Note>
-            Minimum wage ({inr(state.levers.minWageYardstick)}/month, UP unskilled, Oct 2026 – Mar 2027) is a yardstick, not an opex estimate. Break-even units = fixed costs ÷ contribution per secure unit.
+            The minimum-wage row is only a yardstick for scale ({inr(state.levers.minWageYardstick)} a month, UP unskilled worker), not a cost estimate. Break-even = fixed costs ÷ what is left per unit after variable costs.
           </Note>
         </Section>
 
-        <Section title="Costs to collect (₹ per month, per AC)" note="Leave blank until UPSRLM provides actual figures. Nothing here is pre-filled; values are saved in this browser.">
+        <Section title="Enter monthly costs (₹ per month)" note="Leave blank until the real figure is known. Nothing is pre-filled. Values are saved in this browser.">
           <TableWrap>
             <table className="tbl">
               <thead><tr><th>Cost line</th>{ACS.map((a) => <th key={a} className="r">{a}</th>)}</tr></thead>
               <tbody>
-                <tr><td colSpan={3} className="font-semibold text-navy">Variable costs</td></tr>
+                <tr><td colSpan={3} className="font-semibold text-navy">Variable costs (go up with sales)</td></tr>
                 {VARIABLE_COST_LINES.map((l) => (
                   <tr key={l}>
                     <td className="whitespace-normal">{l}</td>
@@ -94,7 +102,7 @@ export default function AcPnlPage() {
                     ))}
                   </tr>
                 ))}
-                <tr><td colSpan={3} className="font-semibold text-navy">Fixed costs</td></tr>
+                <tr><td colSpan={3} className="font-semibold text-navy">Fixed costs (same every month)</td></tr>
                 {FIXED_COST_LINES.map((l) => (
                   <tr key={l}>
                     <td className="whitespace-normal">{l}</td>
@@ -107,7 +115,7 @@ export default function AcPnlPage() {
                 ))}
                 <tr><td colSpan={3} className="font-semibold text-navy">Capacity</td></tr>
                 <tr>
-                  <td>Storage and dispatch capacity (kg / month)</td>
+                  <td>Most kg the warehouse can handle a month</td>
                   {ACS.map((a) => (
                     <td key={a} className="r">
                       <input
@@ -131,16 +139,16 @@ export default function AcPnlPage() {
         </Section>
       </div>
 
-      <Section title="Working capital, both ACs" note="Assumption: the AC pays SHGs on receipt and logistics on dispatch, and receives cash after the cycle. Need = (SHG payouts + logistics) × days ÷ 30.">
+      <Section title="Cash needed to run both warehouses" note="Assumption: the warehouse pays SHGs when goods arrive and pays transport when it ships, but buyers pay later. The longer buyers take, the more cash is tied up.">
         <TableWrap>
           <table className="tbl max-w-2xl">
-            <thead><tr><th>Days from paying SHG and logistics to receiving cash</th>{wc.map((w) => <th key={w.sc} className="r">{w.sc}</th>)}</tr></thead>
+            <thead><tr><th>If buyers pay after…</th>{wc.map((w) => <th key={w.sc} className="r">{w.sc === "S0" ? "Today" : "Recommended plan"}</th>)}</tr></thead>
             <tbody>
               {[15, 30, 45].map((d) => (
-                <tr key={d}><td>{d} days</td>{wc.map((w) => <td key={w.sc} className="r tabular-nums">{inr(workingCapital(w.pay, w.logi, d))}</td>)}</tr>
+                <tr key={d}><td>{d} days, cash tied up</td>{wc.map((w) => <td key={w.sc} className="r tabular-nums">{inr(workingCapital(w.pay, w.logi, d))}</td>)}</tr>
               ))}
-              <tr><td>Monthly SHG payouts</td>{wc.map((w) => <td key={w.sc} className="r tabular-nums">{inr(w.pay)}</td>)}</tr>
-              <tr><td>Monthly logistics</td>{wc.map((w) => <td key={w.sc} className="r tabular-nums">{inr(w.logi)}</td>)}</tr>
+              <tr><td>Paid to SHGs each month</td>{wc.map((w) => <td key={w.sc} className="r tabular-nums">{inr(w.pay)}</td>)}</tr>
+              <tr><td>Transport paid each month</td>{wc.map((w) => <td key={w.sc} className="r tabular-nums">{inr(w.logi)}</td>)}</tr>
             </tbody>
           </table>
         </TableWrap>

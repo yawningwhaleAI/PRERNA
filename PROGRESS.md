@@ -4,7 +4,7 @@ _Last updated: 26 Nov 2026_
 
 ## Status
 Working prototype covering the MVP decision flow (M0–M6 plus parts of M7), built for the submission deadline.
-`npm test` (26 unit, golden, parity and seed tests), `npm run parity` (1,452 values), `npm run lint`, `npm run typecheck`,
+`npm test` (28 unit, golden, parity and seed tests), `npm run parity` (1,452 values), `npm run lint`, `npm run typecheck`,
 `npm run build` and `npm run e2e` (2 Playwright smoke tests) all pass. Screens checked at 1440 px and 1024 px with no page-level horizontal scroll.
 
 ## Decisions taken (answers to the kickoff questions)
@@ -23,6 +23,14 @@ Vercel's serverless file system. Instead:
 - `npm run seed` reads `context/prerna_dataset.xlsx` (checksum-guarded) and the workbook's analyst attributes into `src/data/case-data.json`; a test re-reads the workbook and asserts equality.
 - User inputs (opex, capacity, buyers, boxes, commitments, what-if overrides, levers) are kept in the browser (`localStorage`). Money inputs are stored in integer paise.
 - Moving these to Postgres (Neon / Vercel Postgres) with Prisma is the first post-submission task; the engine is unaffected.
+
+## Plain-language pass (for Prerna staff)
+- Plans renamed: Today (S0) · Fix links (S1) · Fix channels (S2) · Fix both, recommended (S3); a banner on plan-driven pages says which plan is shown and what it changes.
+- Pages renamed: Start here (new) · Overview · Warehouse links · Prices & channels · Compare plans · Buyers & gift boxes · Women's income · Warehouse finances · Data & sources.
+- Jargon replaced across the UI (markup → warehouse margin/income; secure markup → safe income; headroom → below market by; inbound/outbound → transport in/delivery; levers → Assumptions).
+- Every page has a "How to use this page" box. Start here explains the problem, the four plans, monthly routines by role and a glossary.
+- **Bulk needs buyers:** new engine check `bulkDemandCheck` compares the volume a plan moves from online to bulk (2,250 units/month in Fix both) with buyer orders confirmed at LoI or later. Shown on Start, Overview and Prices & channels. Tested.
+- Overview has an action list: which SHGs move warehouse and which products change channel in the selected plan.
 
 ## What was built
 - **Engine** (`src/lib/engine/`, pure TypeScript, no I/O): rates, pricing, allocation (hub rule), channel rule, scenarios S0–S3 + stress tests, baseline product economics, corporate boxes (mixed-AC boxes rejected) and capacity check, headroom-for-inclusion + pass-through grid, inclusion volume test, social distribution (median, Gini, top-20%, correlation, archetypes), AC P&L + working capital, alerts, data-quality rules.

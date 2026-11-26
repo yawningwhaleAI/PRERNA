@@ -2,7 +2,7 @@
 
 import clsx from "clsx";
 import { useState } from "react";
-import { AssumptionTag, Loading, Note, PageHeader, Pill, Section, TableWrap, ToCollect } from "@/components/ui";
+import { AssumptionTag, HowTo, Loading, Note, PageHeader, Pill, Section, TableWrap, ToCollect } from "@/components/ui";
 import { capacityCheck, priceBox, type BoxItemInput } from "@/lib/engine";
 import { inr, num, pct } from "@/lib/format";
 import { SHG, useModel } from "@/lib/model";
@@ -41,14 +41,25 @@ export default function BuyersAndBoxes() {
 
   return (
     <div>
-      <PageHeader title="Buyers & Boxes" question="Which demand is actually committed? Prerna 365 order book, box economics and capacity checks." />
+      <PageHeader title="Buyers & gift boxes" question="Which demand is actually confirmed? Bulk buyers, Prerna 365 gift boxes and whether SHGs can make the order in time." />
+
+      <HowTo
+        steps={[
+          <><b>Build a gift box</b> by entering how many of each product go in. Products must come from one warehouse (the app blocks mixed boxes); it prices the box and shows what the women and the warehouse earn.</>,
+          <><b>Add buyers</b>: Prerna stores, canteens, government (GeM), hotels, companies. Move them along the stages as talks progress.</>,
+          <><b>Record orders</b> (a box or a single product, quantity, delivery month, lead time). The capacity check tells you if the SHGs can make it in time and how many more women it would take.</>,
+          <>Orders at <b>LoI</b> (letter of intent) or later count as confirmed. They show up as &quot;bulk buyers confirmed&quot; on the Overview and Prices pages.</>,
+        ]}
+      >
+        Stages: Lead (first contact) → Sample (sample sent) → LoI (letter of intent) → PO (purchase order) → Delivered → Repeat.
+      </HowTo>
 
       <Section
-        title="Box builder"
+        title="Step 1: Build a gift box"
         note={
           <>
-            Contents must come from one AC (S3 links, including any what-if override). Box SP = Σ(SHG price + inbound + markup) + packaging + delivery.
-            Packaging {inr(L.packagingPerBox)} per box and an order of {num(L.boxesPerOrder)} boxes are levers<AssumptionTag />.
+            All products must come from one warehouse (as linked in the recommended plan). Box price = each product&apos;s price at the warehouse + packaging + delivery.
+            Packaging of {inr(L.packagingPerBox)} per box and an order of {num(L.boxesPerOrder)} boxes are assumptions<AssumptionTag /> (change them under Assumptions).
           </>
         }
       >
@@ -63,7 +74,7 @@ export default function BuyersAndBoxes() {
             </div>
             {(["Bijnor", "Lucknow"] as const).map((ac) => (
               <div key={ac} className="mb-2">
-                <div className="mb-1 text-[11px] font-semibold text-grey uppercase">{ac} stock (S3)</div>
+                <div className="mb-1 text-[11px] font-semibold text-grey uppercase">From {ac} warehouse</div>
                 <div className="grid grid-cols-1 gap-x-3 gap-y-1 sm:grid-cols-2">
                   {m.data.shgs.filter((s) => plan[s.id]!.ac === ac).map((s) => (
                     <label key={s.id} className="flex items-center gap-2 text-[12.5px]">
@@ -108,24 +119,24 @@ export default function BuyersAndBoxes() {
         </div>
       </Section>
 
-      <Section title="Box catalogue">
+      <Section title="Saved gift boxes">
         <TableWrap>
           <table className="tbl">
             <thead>
               <tr>
                 <th>Box</th>
-                <th>AC</th>
+                <th>Warehouse</th>
                 <th className="r">kg</th>
-                <th className="r">SP bulk</th>
-                <th className="r">SP courier</th>
-                <th className="r">Σ market</th>
-                <th className="r">Headroom bulk</th>
-                <th className="r">Headroom courier</th>
-                <th className="r">SHG income / box</th>
-                <th className="r">AC markup / box</th>
-                <th className="r">SHG income / order</th>
-                <th className="r">AC markup / order</th>
-                <th className="r">Months of output</th>
+                <th className="r">Price, truck delivery</th>
+                <th className="r">Price, courier</th>
+                <th className="r">Market price of contents</th>
+                <th className="r">Below market (truck)</th>
+                <th className="r">Below market (courier)</th>
+                <th className="r">Women earn / box</th>
+                <th className="r">Warehouse earns / box</th>
+                <th className="r">Women earn / order</th>
+                <th className="r">Warehouse earns / order</th>
+                <th className="r">Months to make one order</th>
                 <th />
               </tr>
             </thead>
@@ -168,13 +179,13 @@ export default function BuyersAndBoxes() {
           </table>
         </TableWrap>
         <Note>
-          Bulk delivery ships the order to the buyer as one consignment at the bulk rate; courier prices each box as one parcel. Months of output = order size ÷ current monthly units of the binding SKU.
-          Gift purchases are procurement, not CSR spend.
+          Truck delivery sends the whole order to the buyer in one go at the bulk rate; courier sends each box as a separate parcel. &quot;Months to make one order&quot; uses the slowest product (shown in brackets) at today&apos;s monthly output.
+          Gift purchases are normal procurement, not CSR spend.
         </Note>
       </Section>
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
-        <Section title="Buyer register" note="Organisations only. Buyer demand is not in the case: this register starts empty.">
+        <Section title="Step 2: Add buyers" note="Organisations only (no personal details). Buyer demand is not in the case, so this list starts empty.">
           <div className="mb-2 flex flex-wrap gap-2">
             <input className="field flex-1" placeholder="Organisation" value={buyer.name} onChange={(e) => setBuyer({ ...buyer, name: e.target.value })} aria-label="Buyer organisation" />
             <select className="field" value={buyer.type} onChange={(e) => setBuyer({ ...buyer, type: e.target.value as BuyerType })} aria-label="Buyer type">
@@ -222,16 +233,16 @@ export default function BuyersAndBoxes() {
           </TableWrap>
         </Section>
 
-        <Section title="Commitments and capacity check" note="Units required vs current monthly output over the lead time. Flags the binding SKU and the extra earning women needed at today's output per woman.">
+        <Section title="Step 3: Record orders and check capacity" note="Compares the units ordered with what the SHGs make in the lead time at today's pace, and shows how many more earning women it would take.">
           <div className="mb-2 flex flex-wrap gap-2">
             <select className="field" value={com.buyerId} onChange={(e) => setCom({ ...com, buyerId: e.target.value })} aria-label="Commitment buyer">
               <option value="">Buyer…</option>
               {state.buyers.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
             </select>
             <select className="field" value={`${com.kind}:${com.refId}`} onChange={(e) => { const [kind, refId] = e.target.value.split(":"); setCom({ ...com, kind: kind as "box" | "sku", refId: refId ?? "" }); }} aria-label="Box or SKU">
-              <option value="box:">Box or SKU…</option>
+              <option value="box:">Gift box or product…</option>
               <optgroup label="Boxes">{state.boxes.map((b) => <option key={b.id} value={`box:${b.id}`}>{b.name}</option>)}</optgroup>
-              <optgroup label="SKUs">{m.data.shgs.map((s) => <option key={s.id} value={`sku:${s.id}`}>{s.id} {s.product}</option>)}</optgroup>
+              <optgroup label="Single products">{m.data.shgs.map((s) => <option key={s.id} value={`sku:${s.id}`}>{s.id} {s.product}</option>)}</optgroup>
             </select>
             <input className="field w-24 text-right" type="number" min={0} placeholder={com.kind === "box" ? "Boxes" : "Units"} value={com.quantity || ""} onChange={(e) => setCom({ ...com, quantity: Math.max(0, Math.floor(Number(e.target.value) || 0)) })} aria-label="Quantity" />
             <input className="field" type="month" value={com.deliveryMonth} onChange={(e) => setCom({ ...com, deliveryMonth: e.target.value })} aria-label="Delivery month" />
@@ -253,10 +264,10 @@ export default function BuyersAndBoxes() {
           <TableWrap>
             <table className="tbl">
               <thead>
-                <tr><th>Buyer</th><th>Box / SKU</th><th className="r">Qty</th><th>Month</th><th>Stage</th><th>Capacity</th><th /></tr>
+                <tr><th>Buyer</th><th>Gift box / product</th><th className="r">Quantity</th><th>Delivery month</th><th>Stage</th><th>Can SHGs make it in time?</th><th /></tr>
               </thead>
               <tbody>
-                {state.commitments.length === 0 && <tr><td colSpan={7}><ToCollect>no commitments yet</ToCollect></td></tr>}
+                {state.commitments.length === 0 && <tr><td colSpan={7}><ToCollect>no orders yet</ToCollect></td></tr>}
                 {state.commitments.map((c) => {
                   const b = state.buyers.find((x) => x.id === c.buyerId);
                   const ref = c.kind === "box" ? state.boxes.find((x) => x.id === c.refId)?.name : `${c.refId} ${SHG.get(c.refId)?.product ?? ""}`;
@@ -270,13 +281,13 @@ export default function BuyersAndBoxes() {
                       <td>{c.stage}</td>
                       <td className="whitespace-normal">
                         {!cap ? (
-                          <ToCollect>lead time needed</ToCollect>
+                          <ToCollect>enter lead time</ToCollect>
                         ) : cap.ok ? (
-                          <Pill tone="ok">OK · binding {cap.binding?.shgId} {num(cap.binding?.monthsOfOutput ?? 0, 1)} mo</Pill>
+                          <Pill tone="ok">Yes · slowest: {cap.binding?.shgId}, {num(cap.binding?.monthsOfOutput ?? 0, 1)} months of output</Pill>
                         ) : (
                           <span className="text-[12px]">
-                            <Pill tone="orange">Over capacity</Pill>{" "}
-                            {cap.lines.filter((l) => !l.ok).map((l) => `${l.shgId}: needs ${num(l.unitsRequired)} vs ${num(l.outputOverLeadTime)} (+${num(l.extraWomenNeeded)} women)`).join("; ")}
+                            <Pill tone="orange">Not in time</Pill>{" "}
+                            {cap.lines.filter((l) => !l.ok).map((l) => `${l.shgId}: needs ${num(l.unitsRequired)}, can make ${num(l.outputOverLeadTime)} (needs ${num(l.extraWomenNeeded)} more women)`).join("; ")}
                           </span>
                         )}
                       </td>
@@ -290,8 +301,8 @@ export default function BuyersAndBoxes() {
           <label className="mt-3 flex items-start gap-2 text-[12.5px]">
             <input type="checkbox" className="mt-0.5 h-4 w-4 accent-[#204B75]" checked={state.useCommitted} onChange={(e) => set("useCommitted", e.target.checked)} />
             <span>
-              Use committed volume in scenarios: validated commitments (LoI, PO, delivered, repeat) replace the assumed monthly units of their SKUs.
-              {m.committed.size > 0 ? ` Committed SKUs: ${[...m.committed.entries()].map(([k, v]) => `${k} ${num(v)}`).join(", ")}.` : " No validated commitments yet."}
+              Use confirmed orders as the monthly volume in all plans (orders at LoI or later replace the case&apos;s monthly units for those products).
+              {m.committed.size > 0 ? ` Confirmed: ${[...m.committed.entries()].map(([k, v]) => `${k} ${num(v)} units`).join(", ")}.` : " No confirmed orders yet."}
             </span>
           </label>
         </Section>
@@ -307,19 +318,19 @@ function BoxCard({ p }: { p: Extract<ReturnType<typeof priceBox>, { ok: true }> 
   return (
     <TableWrap>
       <table className="tbl" data-testid="box-status">
-        <thead><tr><th>Box from {p.ac} · {num(p.kg, 1)} kg</th><th className="r">₹</th></tr></thead>
+        <thead><tr><th>Box from {p.ac} · {num(p.kg, 1)} kg</th><th className="r">₹ per box</th></tr></thead>
         <tbody>
-          {line("Contents at landed cost", inr(p.contentsLanded))}
-          {line("Packaging (lever)", inr(p.packaging))}
-          {line("Delivery, bulk consignment", inr(p.deliveryBulk, 1))}
-          {line("Delivery, courier per box", inr(p.deliveryCourier, 1))}
-          {line("Selling price, bulk delivery", inr(p.spBulk), p.spBulk > p.sumMarket ? "above-market" : "font-semibold")}
-          {line("Selling price, courier", inr(p.spCourier), p.spCourier > p.sumMarket ? "above-market" : "")}
-          {line("Σ market prices of contents", inr(p.sumMarket))}
-          {line("Headroom bulk / courier", `${pct(p.headroomBulk)} / ${pct(p.headroomCourier)}`)}
-          {line("SHG income / AC markup per box", `${inr(p.shgIncomePerBox)} / ${inr(p.acMarkupPerBox)}`)}
+          {line("Products at warehouse price", inr(p.contentsLanded))}
+          {line("Packaging (assumption)", inr(p.packaging))}
+          {line("Delivery by truck (whole order together)", inr(p.deliveryBulk, 1))}
+          {line("Delivery by courier (each box separately)", inr(p.deliveryCourier, 1))}
+          {line("Box price, truck delivery", inr(p.spBulk), p.spBulk > p.sumMarket ? "above-market" : "font-semibold")}
+          {line("Box price, courier", inr(p.spCourier), p.spCourier > p.sumMarket ? "above-market" : "")}
+          {line("Market price of the same products", inr(p.sumMarket))}
+          {line("Cheaper than market: truck / courier", `${pct(p.headroomBulk)} / ${pct(p.headroomCourier)}`)}
+          {line("Women earn / warehouse earns per box", `${inr(p.shgIncomePerBox)} / ${inr(p.acMarkupPerBox)}`)}
           {line(`Per order of ${num(p.boxesPerOrder)} boxes`, `${inr(p.shgIncomePerOrder)} / ${inr(p.acMarkupPerOrder)}`)}
-          {line("Months of current output (binding SKU)", `${num(p.monthsOfOutput, 1)} (${p.bindingSku})`)}
+          {line("Months to make one order (slowest product)", `${num(p.monthsOfOutput, 1)} (${p.bindingSku})`)}
         </tbody>
       </table>
     </TableWrap>

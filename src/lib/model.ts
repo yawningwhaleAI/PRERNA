@@ -7,6 +7,7 @@ import {
   allocateAll,
   baseline,
   buildAlerts,
+  bulkDemandCheck,
   channelRule,
   evaluateScenario,
   headroomSharing,
@@ -67,7 +68,11 @@ export function useModel() {
       Lucknow: Object.values(opex.Lucknow.fixed).some((v) => v !== null),
     };
     const headroom = headroomSharing(data, results.S3.rows, L);
+    const vol = 1 + L.volumeChange;
     return {
+      /** Products the plan moves from online to bulk vs bulk buyers confirmed in the order book. */
+      bulkDemand: bulkDemandCheck(CASE.shgs, current.plan, committed, vol),
+      bulkDemandS3: bulkDemandCheck(CASE.shgs, results.S3.plan, committed, vol),
       data,
       committed,
       results,

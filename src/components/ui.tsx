@@ -86,3 +86,18 @@ export function Note({ children }: { children: ReactNode }) {
 export function Loading() {
   return <div className="p-8 text-sm text-grey">Loading saved inputs…</div>;
 }
+
+/** "How to use this page" box: plain steps for staff. */
+export function HowTo({ steps, children }: { steps: ReactNode[]; children?: ReactNode }) {
+  return (
+    <details open className="mb-5 rounded border border-line bg-[#f7f9fb] px-3 py-2 text-[12.5px]">
+      <summary className="cursor-pointer font-semibold text-navy">How to use this page</summary>
+      <ol className="mt-1.5 list-decimal space-y-0.5 pl-5 text-[#1f2933]">
+        {steps.map((s, i) => (
+          <li key={i}>{s}</li>
+        ))}
+      </ol>
+      {children && <div className="mt-1.5 text-grey">{children}</div>}
+    </details>
+  );
+}

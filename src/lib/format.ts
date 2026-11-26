@@ -18,6 +18,10 @@ export function pct(x: number | null | undefined, dp = 1): string {
   return `${x < 0 ? "−" : ""}${(Math.abs(x) * 100).toFixed(dp)}%`;
 }
 
+export function signedPct(x: number, dp = 0): string {
+  return `${x > 0 ? "+" : ""}${pct(x, dp)}`;
+}
+
 export function signedInr(x: number, dp = 0): string {
   return `${x > 0 ? "+" : ""}${inr(x, dp)}`;
 }

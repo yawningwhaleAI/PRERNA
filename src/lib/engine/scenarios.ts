@@ -3,11 +3,23 @@ import { channelRule, channelSwitchOnly } from "./channel";
 import { sellingPrice, type PriceOptions } from "./pricing";
 import type { AcName, CaseData, Levers, Plan, ScenarioId, ShgRecord } from "./types";
 
-export const SCENARIOS: { id: ScenarioId; short: string; label: string }[] = [
-  { id: "S0", short: "S0 Today", label: "Today's links and channels, logistics charged" },
-  { id: "S1", short: "S1 Re-link", label: "Re-link mis-linked SHGs (hub rule), channels unchanged" },
-  { id: "S2", short: "S2 Channel", label: "Channel switch at current AC only" },
-  { id: "S3", short: "S3 Re-link + channel", label: "Hub rule plus channel rule (recommended core)" },
+export interface ScenarioInfo {
+  id: ScenarioId;
+  /** Plain-language name used across the app. */
+  name: string;
+  /** Short label for buttons and table headers. */
+  short: string;
+  /** One sentence: what changes in this plan. */
+  what: string;
+  /** Kept for reference to the analysis and the Excel workbook. */
+  label: string;
+}
+
+export const SCENARIOS: ScenarioInfo[] = [
+  { id: "S0", name: "Today's setup", short: "Today", label: "S0 baseline", what: "Nothing changes: same warehouses, same sales channels. Transport is now added to the price (from Oct 2027)." },
+  { id: "S1", name: "Fix warehouse links", short: "Fix links", label: "S1 re-link", what: "SHGs that send goods to a far-away warehouse switch to the one with cheaper transport. Products are sold the same way as today." },
+  { id: "S2", name: "Fix sales channels", short: "Fix channels", label: "S2 channel", what: "Products that are too expensive online are sold in bulk (Prerna stores, canteens, institutions) instead. Warehouses stay as today." },
+  { id: "S3", name: "Fix both (recommended)", short: "Fix both", label: "S3 re-link + channel", what: "Each SHG uses the warehouse with cheaper transport, then each product is sold online or in bulk, whichever keeps it at or below market price." },
 ];
 
 export interface RunOptions {
@@ -218,8 +230,8 @@ export function stressTests(data: CaseData, plan: Plan, levers: Levers): StressR
   const base = runOptions(levers);
   const run = (o: RunOptions) => summarise(runScenario(data, plan, o), levers.thinHeadroom);
   return [
-    { label: "Logistics rates +10%", shock: 0.1, kind: "rates", summary: run({ ...base, inMult: base.inMult * 1.1, outMult: base.outMult * 1.1 }) },
-    { label: "Logistics rates +20%", shock: 0.2, kind: "rates", summary: run({ ...base, inMult: base.inMult * 1.2, outMult: base.outMult * 1.2 }) },
-    { label: "Volume −20%", shock: -0.2, kind: "volume", summary: run({ ...base, volMult: base.volMult * 0.8 }) },
+    { label: "Courier and truck rates rise 10%", shock: 0.1, kind: "rates", summary: run({ ...base, inMult: base.inMult * 1.1, outMult: base.outMult * 1.1 }) },
+    { label: "Courier and truck rates rise 20%", shock: 0.2, kind: "rates", summary: run({ ...base, inMult: base.inMult * 1.2, outMult: base.outMult * 1.2 }) },
+    { label: "Sales fall 20%", shock: -0.2, kind: "volume", summary: run({ ...base, volMult: base.volMult * 0.8 }) },
   ];
 }
