@@ -80,11 +80,19 @@ The source of truth for the problem is **`context/prerna_dataset.xlsx`** (the ca
 - Typeface: Inter or Arial. Dense, consultant-style tables with no decorative gradients or emoji.
 - "Above market" values in orange, bold. Assumption-driven values get a small grey "assumption" tag.
 
+## Prototype note (Nov 2026)
+For the Vercel prototype there is no database at runtime (SQLite cannot persist on Vercel). The seed writes
+`src/data/case-data.json` from the case dataset; user inputs live in the browser (`localStorage`, money in paise).
+Prisma + Postgres is the first post-prototype task. Lever semantics: levers re-derive hub and channel decisions;
+stress tests keep the S3 plan fixed and shock it. See `PROGRESS.md`.
+
 ## Commands (keep this section updated)
 - `npm run dev`
-- `npm test`: Vitest including golden tests
-- `npm run seed`: loads `context/prerna_dataset.xlsx` into the DB
+- `npm test`: Vitest including golden, parity and seed tests
+- `npm run seed`: loads `context/prerna_dataset.xlsx` (and analyst attributes) into `src/data/case-data.json`
 - `npm run parity`: compares engine outputs with `context/reference_outputs/*.csv`
+- `npm run lint`, `npm run typecheck`, `npm run build`
+- `npm run e2e`: Playwright smoke tests (needs a build; starts `next start` on port 3100)
 
 ## Definition of done (every milestone)
 - `npm test` is green, including golden and parity tests.

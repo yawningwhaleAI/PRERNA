@@ -6,10 +6,19 @@ export type ChannelFlag = "ok" | "premium-or-turnaround";
 export interface ChannelDecision {
   channel: Channel;
   flag: ChannelFlag;
+  inbound: number;
+  onlineOutbound: number;
+  bulkOutbound: number;
   onlineSp: number;
   bulkSp: number;
   onlineWorks: boolean;
   bulkWorks: boolean;
+  /** Highest markup (share of SHG price) that keeps SP at or below market. */
+  maxMarkupOnline: number;
+  maxMarkupBulk: number;
+  courierPctOfShgPrice: number;
+  /** What is left below market for a stockist's margin if sold in bulk. */
+  stockistHeadroom: number;
 }
 
 /**
@@ -18,8 +27,10 @@ export interface ChannelDecision {
  * else online, flagged for premium positioning or turnaround.
  */
 export function channelRule(shg: ShgRecord, ac: AcName, card: RateCard, opts: PriceOptions = {}): ChannelDecision {
-  const onlineSp = sellingPrice(shg, ac, "Online", card, opts).sp;
-  const bulkSp = sellingPrice(shg, ac, "Bulk", card, opts).sp;
+  const online = sellingPrice(shg, ac, "Online", card, opts);
+  const bulk = sellingPrice(shg, ac, "Bulk", card, opts);
+  const onlineSp = online.sp;
+  const bulkSp = bulk.sp;
   const onlineWorks = onlineSp <= shg.market;
   const bulkWorks = bulkSp <= shg.market;
   let channel: Channel;
@@ -31,7 +42,21 @@ export function channelRule(shg: ShgRecord, ac: AcName, card: RateCard, opts: Pr
     channel = "Online";
     flag = "premium-or-turnaround";
   }
-  return { channel, flag, onlineSp, bulkSp, onlineWorks, bulkWorks };
+  return {
+    channel,
+    flag,
+    inbound: online.inbound,
+    onlineOutbound: online.outbound,
+    bulkOutbound: bulk.outbound,
+    onlineSp,
+    bulkSp,
+    onlineWorks,
+    bulkWorks,
+    maxMarkupOnline: (shg.market - shg.shgPrice - online.inbound - online.outbound) / shg.shgPrice,
+    maxMarkupBulk: (shg.market - shg.shgPrice - bulk.inbound - bulk.outbound) / shg.shgPrice,
+    courierPctOfShgPrice: online.outbound / shg.shgPrice,
+    stockistHeadroom: (shg.market - bulkSp) / shg.market,
+  };
 }
 
 /** S2 rule: at the current AC, switch online → bulk only if online fails and bulk passes. */

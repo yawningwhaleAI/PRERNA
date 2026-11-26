@@ -47,7 +47,7 @@ export function pearson(xs: number[], ys: number[]): number {
   return sxy / Math.sqrt(sxx * syy);
 }
 
-export type Archetype = "Skill-gated (few earners, higher pay)" | "Volume-thin (many earners, low pay)" | "Broad and better-paid" | "Few earners, low pay";
+export type Archetype = "Skill-gated" | "Volume-thin" | "Broad, better-paid" | "Few earners, low pay";
 
 export interface ShgSocialRow {
   shgId: string;
@@ -109,10 +109,10 @@ export function socialAnalysis(data: CaseData, levers: Levers): { rows: ShgSocia
     const highPay = perEarner >= med;
     const archetype: Archetype = highP
       ? highPay
-        ? "Broad and better-paid"
-        : "Volume-thin (many earners, low pay)"
+        ? "Broad, better-paid"
+        : "Volume-thin"
       : highPay
-        ? "Skill-gated (few earners, higher pay)"
+        ? "Skill-gated"
         : "Few earners, low pay";
     return {
       shgId: s.id,

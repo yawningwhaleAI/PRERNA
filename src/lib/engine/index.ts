@@ -10,3 +10,5 @@ export * from "./boxes";
 export * from "./inclusion";
 export * from "./social";
 export * from "./pnl";
+export * from "./alerts";
+export * from "./quality";

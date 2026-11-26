@@ -27,7 +27,11 @@ describe("Seed: case dataset loaded without changes", () => {
     const keys = new Set<string>();
     const walk = (v: unknown) => {
       if (Array.isArray(v)) v.forEach(walk);
-      else if (v && typeof v === "object") for (const [k, x] of Object.entries(v)) (keys.add(k.toLowerCase()), walk(x));
+      else if (v && typeof v === "object")
+        for (const [k, x] of Object.entries(v)) {
+          keys.add(k.toLowerCase());
+          walk(x);
+        }
     };
     walk(seeded);
     for (const k of keys) expect(k).not.toMatch(/name|phone|mobile|aadhaar|bank|email|address/);
