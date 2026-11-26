@@ -1,0 +1,21 @@
+scenario,shg_id,product,ac,channel,sp,market,competitive,headroom_pct,units,markup_rev,inbound_spend,outbound_spend,shg_income,active,members
+S1,SHG-01,Jaggery (1 kg),Bijnor,Online,175.0,160,False,-0.09375,500.0,7500.0,5000.0,25000.0,6000.0,10,12
+S1,SHG-02,Honey (500 g),Bijnor,Online,285.0,350,True,0.18571428571428572,300.0,9000.0,1500.0,15000.0,7500.0,5,10
+S1,SHG-03,Brass diya set,Bijnor,Online,980.0,1200,True,0.18333333333333332,100.0,12000.0,1000.0,5000.0,10000.0,3,10
+S1,SHG-04,Papad (500 g),Bijnor,Bulk,79.0,100,True,0.21,600.0,5400.0,3000.0,3000.0,4800.0,12,12
+S1,SHG-05,Garam masala (500 g),Bijnor,Online,147.0,120,False,-0.225,700.0,8400.0,3500.0,35000.0,7000.0,8,11
+S1,SHG-06,Detergent powder (2 kg),Bijnor,Online,299.0,260,False,-0.15,400.0,9600.0,16000.0,30000.0,8000.0,6,10
+S1,SHG-07,Zari clutch,Bijnor,Online,1440.0,1600,True,0.1,100.0,18000.0,1000.0,5000.0,15000.0,4,10
+S1,SHG-08,Chikankari kurta,Lucknow,Online,1665.0,1900,True,0.12368421052631579,150.0,31500.0,750.0,7500.0,26250.0,5,12
+S1,SHG-09,Mustard oil (1 L),Lucknow,Online,244.0,220,False,-0.10909090909090909,500.0,12000.0,5000.0,25000.0,10000.0,9,11
+S1,SHG-10,Dona-pattal (100 pcs),Lucknow,Bulk,89.0,100,True,0.11,600.0,5400.0,6000.0,6000.0,4800.0,10,10
+S1,SHG-11,Honey (500 g),Lucknow,Online,285.0,290,True,0.017241379310344827,300.0,9000.0,1500.0,15000.0,7500.0,5,10
+S1,SHG-12,Masala combo (1 kg),Lucknow,Online,336.0,350,True,0.04,250.0,9000.0,2500.0,12500.0,7500.0,6,10
+S1,SHG-13,Banarasi silk saree,Lucknow,Online,4670.0,5500,True,0.1509090909090909,30.0,18000.0,600.0,1500.0,15000.0,2,10
+S1,SHG-14,Wooden toy set,Lucknow,Online,645.0,650,True,0.007692307692307693,120.0,9000.0,2400.0,6000.0,7200.0,4,10
+S1,SHG-15,Terracotta horse,Lucknow,Online,1265.0,1280,True,0.01171875,60.0,9000.0,2400.0,4500.0,7200.0,3,10
+S1,SHG-16,Multigrain atta (5 kg),Lucknow,Online,526.0,440,False,-0.19545454545454546,150.0,5400.0,15000.0,22500.0,4500.0,8,12
+S1,SHG-17,Kala namak rice (1 kg),Lucknow,Online,231.0,240,True,0.0375,700.0,14700.0,14000.0,35000.0,10500.0,10,12
+S1,SHG-18,Jute bag,Lucknow,Bulk,153.0,180,True,0.15,250.0,4500.0,2500.0,1250.0,3750.0,7,10
+S1,SHG-19,Ghee (1 L),Bijnor,Online,770.0,850,True,0.09411764705882353,150.0,13500.0,4500.0,7500.0,11250.0,6,11
+S1,SHG-20,Soft toy,Lucknow,Online,525.0,550,True,0.045454545454545456,140.0,8400.0,2100.0,7000.0,7000.0,4,10

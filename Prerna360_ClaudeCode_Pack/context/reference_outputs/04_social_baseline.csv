@@ -1,0 +1,21 @@
+shg_id,district,product,members,active,inactive,participation,shg_income_month,income_per_active_month,income_per_member_month_if_shared,competitive
+SHG-01,Bijnor,Jaggery (1 kg),12,10,2,0.8333333333333334,6000,600.0,500.0,False
+SHG-02,Bijnor,Honey (500 g),10,5,5,0.5,7500,1500.0,750.0,True
+SHG-03,Moradabad,Brass diya set,10,3,7,0.3,10000,3333.3333333333335,1000.0,True
+SHG-04,Moradabad,Papad (500 g),12,12,0,1.0,4800,400.0,400.0,True
+SHG-05,Meerut,Garam masala (500 g),11,8,3,0.7272727272727273,7000,875.0,636.3636363636364,False
+SHG-06,Hapur,Detergent powder (2 kg),10,6,4,0.6,8000,1333.3333333333333,800.0,False
+SHG-07,Badaun,Zari clutch,10,4,6,0.4,15000,3750.0,1500.0,True
+SHG-08,Lucknow,Chikankari kurta,12,5,7,0.4166666666666667,26250,5250.0,2187.5,True
+SHG-09,Barabanki,Mustard oil (1 L),11,9,2,0.8181818181818182,10000,1111.111111111111,909.0909090909091,False
+SHG-10,Sitapur,Dona-pattal (100 pcs),10,10,0,1.0,4800,480.0,480.0,True
+SHG-11,Sitapur,Honey (500 g),10,5,5,0.5,7500,1500.0,750.0,False
+SHG-12,Kanpur Nagar,Masala combo (1 kg),10,6,4,0.6,7500,1250.0,750.0,False
+SHG-13,Varanasi,Banarasi silk saree,10,2,8,0.2,15000,7500.0,1500.0,True
+SHG-14,Varanasi,Wooden toy set,10,4,6,0.4,7200,1800.0,720.0,False
+SHG-15,Gorakhpur,Terracotta horse,10,3,7,0.3,7200,2400.0,720.0,False
+SHG-16,Gorakhpur,Multigrain atta (5 kg),12,8,4,0.6666666666666666,4500,562.5,375.0,False
+SHG-17,Siddharthnagar,Kala namak rice (1 kg),12,10,2,0.8333333333333334,10500,1050.0,875.0,False
+SHG-18,Siddharthnagar,Jute bag,10,7,3,0.7,3750,535.7142857142857,375.0,True
+SHG-19,Jhansi,Ghee (1 L),11,6,5,0.5454545454545454,11250,1875.0,1022.7272727272727,True
+SHG-20,Jhansi,Soft toy,10,4,6,0.4,7000,1750.0,700.0,True

@@ -1,0 +1,32 @@
+{
+  "total_members": 213,
+  "active": 127,
+  "inactive": 86,
+  "participation": 0.5962,
+  "total_shg_income_month": 180750.0,
+  "mean_income_active": 1423.23,
+  "median_income_active": 1050.0,
+  "mean_income_all_members": 848.59,
+  "gini_active_only": 0.4239,
+  "gini_all_members": 0.6565,
+  "min_income_active": 400.0,
+  "max_income_active": 7500.0,
+  "top_quintile_share_of_income": 0.4885,
+  "shgs_participation_below_50pct": [
+    "SHG-03",
+    "SHG-07",
+    "SHG-08",
+    "SHG-13",
+    "SHG-14",
+    "SHG-15",
+    "SHG-20"
+  ],
+  "shgs_full_participation": [
+    "SHG-04",
+    "SHG-10"
+  ],
+  "active_women_in_uncompetitive_shgs_S0": 69,
+  "members_in_uncompetitive_shgs_S0": 108,
+  "income_at_risk_S0": 75400.0,
+  "active_women_below_8333_pm_from_this_product": 127
+}

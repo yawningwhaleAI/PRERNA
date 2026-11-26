@@ -1,0 +1,77 @@
+[
+  {
+    "check": "Missing values",
+    "result": 0,
+    "note": "No blank cells in SHG Data"
+  },
+  {
+    "check": "Duplicate SHG IDs",
+    "result": 0,
+    "note": "SHG IDs unique"
+  },
+  {
+    "check": "Same product, different market benchmark",
+    "result": 2,
+    "note": [
+      {
+        "shg_id": "SHG-02",
+        "product": "Honey (500 g)",
+        "district": "Bijnor",
+        "market_price": 350,
+        "linked_ac": "Bijnor"
+      },
+      {
+        "shg_id": "SHG-11",
+        "product": "Honey (500 g)",
+        "district": "Sitapur",
+        "market_price": 290,
+        "linked_ac": "Bijnor"
+      }
+    ]
+  },
+  {
+    "check": "SHG profit as % of SHG price (range)",
+    "result": "10.7% - 13.3%",
+    "note": "Profit is ~12.5% of SHG price for most rows; remainder (cost incl. raw material and possibly wages) not broken down"
+  },
+  {
+    "check": "Active > members",
+    "result": 0,
+    "note": "None"
+  },
+  {
+    "check": "Districts whose SHGs are linked to different ACs",
+    "result": [
+      "Jhansi",
+      "Siddharthnagar",
+      "Sitapur"
+    ],
+    "note": "Legacy linkage inconsistency"
+  },
+  {
+    "check": "Distances exactly on a band boundary",
+    "result": [
+      {
+        "shg_id": "SHG-13",
+        "dist_bijnor": 650,
+        "dist_lucknow": 300
+      },
+      {
+        "shg_id": "SHG-14",
+        "dist_bijnor": 650,
+        "dist_lucknow": 300
+      },
+      {
+        "shg_id": "SHG-19",
+        "dist_bijnor": 500,
+        "dist_lucknow": 320
+      },
+      {
+        "shg_id": "SHG-20",
+        "dist_bijnor": 500,
+        "dist_lucknow": 320
+      }
+    ],
+    "note": "Interpreted as the lower band ('up to 100', '101-300', '301-500')"
+  }
+]

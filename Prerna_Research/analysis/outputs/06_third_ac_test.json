@@ -1,0 +1,20 @@
+{
+  "east_up_shgs": [
+    "SHG-13",
+    "SHG-14",
+    "SHG-15",
+    "SHG-16",
+    "SHG-17",
+    "SHG-18"
+  ],
+  "east_up_kg_month": 1845.0,
+  "east_up_inbound_after_S3": 36900.0,
+  "east_up_max_saving_if_all_moved_to_10_per_kg": 18450.0,
+  "bundelkhand_shgs": [
+    "SHG-19",
+    "SHG-20"
+  ],
+  "bundelkhand_kg_month": 220.0,
+  "bundelkhand_max_saving": 4400.0,
+  "note": "Upper bound: assumes a new hub puts every SHG in the <=100 km band. Compare against unknown monthly fixed cost of a hub."
+}
