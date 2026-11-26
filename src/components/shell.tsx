@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { DEFAULT_LEVERS, SCENARIOS } from "@/lib/engine";
 import { useStore } from "@/lib/store";
 import { LeversDrawer } from "./levers-drawer";
@@ -29,10 +29,12 @@ export function Shell({ children }: { children: ReactNode }) {
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-30 flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-line bg-white px-4 py-2">
         <div className="flex items-center gap-2.5">
+          <UpEmblem />
           <Image src="/gdi.png" alt="GDi" width={40} height={40} priority />
           <div className="leading-tight">
             <div className="text-[15px] font-bold text-navy">Prerna 360</div>
             <div className="text-[10.5px] text-grey">Aggregation Centre decision support · UPSRLM × GDi</div>
+            <div className="text-[9.5px] font-semibold text-orange">Prototype · not an official Government of Uttar Pradesh website</div>
           </div>
         </div>
         <div className="ml-auto flex flex-wrap items-center gap-3">
@@ -83,5 +85,23 @@ export function Shell({ children }: { children: ReactNode }) {
       </div>
       <LeversDrawer open={open} onClose={() => setOpen(false)} />
     </div>
+  );
+}
+
+/**
+ * Government of Uttar Pradesh emblem, shown when /public/up-emblem.png is present.
+ * Hidden (no broken image) until the file is added.
+ */
+function UpEmblem() {
+  const [ok, setOk] = useState(false);
+  useEffect(() => {
+    const probe = new window.Image();
+    probe.onload = () => setOk(true);
+    probe.src = "/up-emblem.png";
+  }, []);
+  if (!ok) return null;
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src="/up-emblem.png" alt="Government of Uttar Pradesh" width={40} height={40} className="h-10 w-10 object-contain" />
   );
 }
