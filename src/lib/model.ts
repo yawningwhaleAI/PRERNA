@@ -3,7 +3,16 @@
 import { useMemo } from "react";
 import caseData from "@/data/case-data.json";
 import {
+  DEMAND_PRESETS,
+  aboveMarketAtZeroMarkup,
+  acTransfer,
   acPnl,
+  evaluateBlanketGated,
+  evaluateHybrid,
+  exposureBySeverity,
+  relinkSaving,
+  securedShareFromOrders,
+  sellingPrice,
   allocateAll,
   baseline,
   buildAlerts,
@@ -49,16 +58,29 @@ export function useModel() {
         ? { ...CASE, shgs: CASE.shgs.map((s) => (committed.has(s.id) ? { ...s, units: committed.get(s.id)! } : s)) }
         : CASE;
     const L = state.levers;
-    const results = Object.fromEntries(
-      (["S0", "S1", "S2", "S3"] as ScenarioId[]).map((id) => [id, evaluateScenario(id, data, L, state.acOverrides)]),
-    ) as Record<ScenarioId, ReturnType<typeof evaluateScenario>>;
+    const hybrid = evaluateHybrid(data, L, state.acOverrides, committed);
+    const results = {
+      ...Object.fromEntries((["S0", "S1", "S2", "S3"] as ScenarioId[]).map((id) => [id, evaluateScenario(id, data, L, state.acOverrides)])),
+      SH: hybrid,
+    } as unknown as Record<ScenarioId, ReturnType<typeof evaluateScenario>>;
+    const ceiling = evaluateHybrid(data, { ...L, packAcceptance: 1, bulkSecured: 1 }, state.acOverrides);
     const current = results[state.scenario];
     const opt = { edgeInclusive: L.edgeInclusive, inMult: 1 + L.inboundRateChange, volMult: 1 + L.volumeChange };
     const allocation = allocateAll(data.shgs, data.rateCard, opt);
     const priceOpts = { edgeInclusive: L.edgeInclusive, inMult: 1 + L.inboundRateChange, outMult: 1 + L.outboundRateChange };
     const channels = data.shgs.map((s) => {
       const ac = results.S3.plan[s.id]!.ac;
-      return { shgId: s.id, ac, ...channelRule(s, ac, data.rateCard, priceOpts) };
+      const h = results.SH.plan[s.id]!;
+      const pack = h.unitsPerParcel ?? 1;
+      return {
+        shgId: s.id,
+        ac,
+        ...channelRule(s, ac, data.rateCard, priceOpts),
+        /** Recommended (hybrid) treatment. */
+        hybrid: h,
+        packSize: pack,
+        packSp: pack > 1 ? sellingPrice(s, h.ac, "Online", data.rateCard, { ...priceOpts, unitsPerParcel: pack }).sp : null,
+      };
     });
     const opex = { Bijnor: opexRupees("Bijnor"), Lucknow: opexRupees("Lucknow") };
     const pnl = (id: ScenarioId, ac: AcName) =>
@@ -69,10 +91,27 @@ export function useModel() {
     };
     const headroom = headroomSharing(data, results.S3.rows, L);
     const vol = 1 + L.volumeChange;
+    const presets = DEMAND_PRESETS.map((p) => ({ ...p, result: evaluateHybrid(data, { ...L, packAcceptance: p.packAcceptance, bulkSecured: p.bulkSecured }, state.acOverrides) }));
+    const blanket = [0, 0.25, 0.5, 0.75, 1].map((c) => ({ secured: c, result: evaluateBlanketGated(data, L, c, state.acOverrides) }));
     return {
+      /** Recommended hybrid with the demand gate applied (current pack acceptance and secured bulk). */
+      hybrid,
+      /** Share of needs-buyer bulk volume covered by confirmed orders in the order book. */
+      autoSecured: securedShareFromOrders(data, hybrid.gatedIds, committed, vol),
+      ceiling,
+      presets,
+      blanket,
+      /** Floor: re-link only (S1). */
+      floor: results.S1.summary,
+      freight: relinkSaving(data, L),
+      exposure: exposureBySeverity(results.S0.rows, 0.05),
+      zeroMarkup: aboveMarketAtZeroMarkup(results.S1.rows),
+      transfer: acTransfer(results.S0.summary, results.S1.summary),
+      bulkDemandHybrid: bulkDemandCheck(CASE.shgs, results.SH.plan, committed, vol),
       /** Products the plan moves from online to bulk vs bulk buyers confirmed in the order book. */
       bulkDemand: bulkDemandCheck(CASE.shgs, current.plan, committed, vol),
       bulkDemandS3: bulkDemandCheck(CASE.shgs, results.S3.plan, committed, vol),
+      bulkDemandBlanket: bulkDemandCheck(CASE.shgs, results.S3.plan, committed, vol),
       data,
       committed,
       results,
@@ -80,7 +119,7 @@ export function useModel() {
       allocation,
       channels,
       baseline: baseline(data, L),
-      stress: stressTests(data, results.S3.plan, L),
+      stress: stressTests(data, results.SH.plan, L),
       social: socialAnalysis(data, L),
       inclusionVolume: inclusionVolumeTest(data, L),
       headroom,

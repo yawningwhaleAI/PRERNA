@@ -13,7 +13,7 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
   title: "Prerna 360",
-  description: "Decision support for the Prerna Aggregation Centres (UPSRLM × GDi)",
+  description: "Prototype decision support for the Prerna Aggregation Centres, built for the GDi Partners Consultant case (Round 1). Not an official Government of Uttar Pradesh website.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

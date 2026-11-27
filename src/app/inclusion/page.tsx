@@ -2,16 +2,15 @@
 
 import clsx from "clsx";
 import { ArchetypeScatter } from "@/components/charts";
-import { AssumptionTag, HowTo, Kpi, Loading, Note, PageHeader, Section, TableWrap, ToCollect } from "@/components/ui";
+import { AssumptionTag, HowTo, Kpi, Note, PageHeader, Section, TableWrap, ToCollect } from "@/components/ui";
 import { PASSTHROUGH_SHARES, VOLUME_KEPT } from "@/lib/engine";
 import { inr, num, pct, signedInr } from "@/lib/format";
 import { useModel } from "@/lib/model";
 import { useStore } from "@/lib/store";
 
 export default function Inclusion() {
-  const { state, hydrated } = useStore();
+  const { state } = useStore();
   const m = useModel();
-  if (!hydrated) return <Loading />;
   const { rows, summary: s } = m.social;
   const vol = new Map(m.inclusionVolume.map((v) => [v.shgId, v]));
   const s0 = new Map(m.results.S0.rows.map((r) => [r.shgId, r]));
@@ -42,7 +41,7 @@ export default function Inclusion() {
         <Kpi label="Pay inequality, earners" value={s.giniEarners.toFixed(2)} sub="Gini: 0 = everyone equal, 1 = one woman earns all" />
         <Kpi label="Pay inequality, all members" value={s.giniAllMembers.toFixed(2)} sub="Gini, counting non-earners at ₹0" alert />
         <Kpi label="Earned by the top 20%" value={pct(s.topQuintileShare)} sub="of all earning women's income" />
-        <Kpi label="Pay vs share earning" value={`r = ${s.correlationParticipationIncome.toFixed(2)}`} sub="negative: better-paid SHGs employ fewer women" />
+        <Kpi label="Pay vs share earning" value={`r = ${s.correlationParticipationIncome.toFixed(2)}`} sub={`observed association across ${num(rows.length)} SHGs, not causation`} />
       </div>
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
@@ -74,8 +73,8 @@ export default function Inclusion() {
       </div>
 
       <Section
-        title={`What it takes for ${pct(L.participationTarget, 0)} of members in every SHG to earn`}
-        note={`${num(newWomen)} more women earning, and ${num(extraUnits)} extra units sold a month (${pct(extraUnits / unitsNow)} more than today) so nobody's pay is cut. Training alone is not enough: inclusion needs orders.`}
+        title={`Aspiration: ${pct(L.participationTarget, 0)} of members earning in each SHG (agreed SHG by SHG, not a mandate)`}
+        note={`SHGs are autonomous and UPSRLM cannot assign work. At today's output per woman, ${num(newWomen)} more women earning needs ${num(extraUnits)} extra units sold a month (${pct(extraUnits / unitsNow)} more than today), so nobody's pay is cut. Training alone is not enough: inclusion needs orders.`}
       >
         <TableWrap>
           <table className="tbl">
@@ -113,6 +112,14 @@ export default function Inclusion() {
         </TableWrap>
       </Section>
 
+      <details className="mb-6 rounded border border-line bg-white px-3 py-2" data-testid="advanced-analysis">
+        <summary className="cursor-pointer text-[13px] font-semibold text-navy">
+          Advanced analysis: SHG price rise (headroom-for-inclusion) <span className="ml-1 rounded-sm bg-gray-100 px-1.5 py-0.5 text-[11px] font-semibold text-grey">not part of the recommendation</span>
+        </summary>
+        <p className="mt-2 text-[12px] text-grey">
+          Kept for transparency only. The submission does not recommend raising prices: it would work against fair prices for buyers, and the gains go mostly to SHGs whose women already earn the most.
+        </p>
+        <div className="mt-3">
       <Section
         title="Can some SHGs raise their price and share the gain?"
         note={
@@ -166,6 +173,8 @@ export default function Inclusion() {
           </div>
         </div>
       </Section>
+        </div>
+      </details>
     </div>
   );
 }

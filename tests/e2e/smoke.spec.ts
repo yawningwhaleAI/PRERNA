@@ -14,3 +14,29 @@ test("box builder blocks a mixed-AC box", async ({ page }) => {
   await page.getByTestId("qty-SHG-08").fill("1");
   await expect(page.getByTestId("box-status")).toContainText("Mixed-AC box blocked");
 });
+
+test("default plan is the buyer-backed hybrid: floor 15 → ceiling 20; 100% bulk secured gives 20 of 20", async ({ page }) => {
+  await page.goto("/command-centre");
+  await expect(page.getByTestId("scenario-SH")).toHaveClass(/bg-navy/);
+  await expect(page.getByTestId("floor")).toHaveText("15 / 20");
+  await expect(page.getByTestId("ceiling")).toHaveText("20 / 20");
+  await expect(page.getByTestId("kpi-competitive")).toHaveText("17");
+  await page.getByTestId("bulk-secured").fill("100");
+  await expect(page.getByTestId("demand-competitive")).toHaveText("20 of 20");
+  await expect(page.getByTestId("kpi-competitive")).toHaveText("20");
+});
+
+test("/start is server-rendered with real numbers (QR path)", async ({ request }) => {
+  const html = (await (await request.get("/start")).text()).replace(/<!-- -->/g, "");
+  expect(html).not.toContain("Loading saved inputs");
+  expect(html).toContain("15 / 20");
+  expect(html).toContain("₹42,400");
+  expect(html).toContain("GDi Partners");
+  expect(html).not.toMatch(/\+91|70452/);
+});
+
+test("headroom price rise is hidden by default", async ({ page }) => {
+  await page.goto("/inclusion");
+  await expect(page.getByTestId("advanced-analysis")).not.toHaveAttribute("open", "");
+  await expect(page.getByText("not part of the recommendation")).toBeVisible();
+});

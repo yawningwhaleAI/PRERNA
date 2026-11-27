@@ -2,14 +2,14 @@
 
 import clsx from "clsx";
 import { useState } from "react";
-import { AssumptionTag, HowTo, Loading, Note, PageHeader, Pill, Section, TableWrap, ToCollect } from "@/components/ui";
+import { AssumptionTag, HowTo, Note, PageHeader, Pill, Section, TableWrap, ToCollect } from "@/components/ui";
 import { capacityCheck, priceBox, type BoxItemInput } from "@/lib/engine";
 import { inr, num, pct } from "@/lib/format";
 import { SHG, useModel } from "@/lib/model";
 import { BUYER_TYPES, STAGES, newId, useStore, type Box, type Buyer, type BuyerType, type Commitment, type Stage } from "@/lib/store";
 
 export default function BuyersAndBoxes() {
-  const { state, set, hydrated } = useStore();
+  const { state, set } = useStore();
   const m = useModel();
   const [draft, setDraft] = useState<{ id: string | null; name: string; tier: Box["tier"]; items: Record<string, number> }>({
     id: null,
@@ -19,9 +19,8 @@ export default function BuyersAndBoxes() {
   });
   const [buyer, setBuyer] = useState<Omit<Buyer, "id">>({ name: "", type: "Corporate", owner: "", stage: "Lead" });
   const [com, setCom] = useState<Omit<Commitment, "id">>({ buyerId: "", kind: "box", refId: "", quantity: 0, deliveryMonth: "", stage: "LoI", leadTimeMonths: null });
-  if (!hydrated) return <Loading />;
 
-  const plan = m.results.S3.plan; // boxes are built on the recommended (S3) links, including what-if overrides
+  const plan = m.results.SH.plan; // boxes use the recommended plan's AC links (re-linked), including what-if overrides
   const L = state.levers;
   const draftItems: BoxItemInput[] = Object.entries(draft.items).filter(([, q]) => q > 0).map(([shgId, qty]) => ({ shgId, qty }));
   const draftPriced = priceBox(m.data, draftItems, plan, L);

@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import clsx from "clsx";
-import { Loading, Section, TableWrap } from "@/components/ui";
+import { Section, TableWrap } from "@/components/ui";
+import { BulkComparison, ExposureSplit, HeadlineCards } from "@/components/headline";
 import { SCENARIOS, type RateCard } from "@/lib/engine";
 import { inr, num, pct } from "@/lib/format";
 import { useModel } from "@/lib/model";
@@ -12,8 +13,8 @@ const ROLES = [
   {
     who: "State marketing team (monthly review)",
     steps: [
-      ["Open Overview", "/command-centre", "and switch between Today and Fix both: how many products are priced OK, how much income is at risk."],
-      ["Check the action list", "/command-centre", "on Overview: which SHGs to move and which products to sell in bulk."],
+      ["Open Overview", "/command-centre", "and switch between Today and Hybrid: the floor after re-linking, the ceiling, and what is still at risk."],
+      ["Check the action list", "/command-centre", "on Overview: which SHGs to re-link, which products become multi-packs, which wait for a bulk buyer."],
       ["Approve a plan", "/scenarios", "after comparing all four plans side by side."],
     ],
   },
@@ -28,7 +29,7 @@ const ROLES = [
   {
     who: "Sales team (bulk buyers and Prerna 365 gift boxes)",
     steps: [
-      ["Record every buyer and order", "/buyers", "so a move to bulk is backed by real demand, not hope."],
+      ["Record every buyer and order", "/buyers", ": confirmed orders (LoI or later) are what move a product to bulk."],
       ["Build a gift box", "/buyers", "from one warehouse's stock: the app prices it and blocks mixed boxes."],
       ["Run the capacity check", "/buyers", "before accepting a purchase order: can the SHGs make it in time?"],
     ],
@@ -49,22 +50,20 @@ const glossary = (c: RateCard): [string, string][] => [
   ["Bulk", `Many units together by shared truck to Prerna stores, canteens or institutions: ${inr(c.bulkPerKg)} per kg.`],
   ["Selling price", `SHG price + transport to the warehouse + warehouse margin (${pct(c.markup, 0)} of SHG price) + delivery to the buyer.`],
   ["Priced OK", "Selling price at or below the market price of a similar product. Above market = likely to struggle to sell."],
-  ["Income at risk", "Money from products priced above market: the warehouse margin and the women's income on those products."],
-  ["Safe warehouse income", "Warehouse margin from products priced OK. This is what the warehouse can count on to pay its costs."],
+  ["Income at risk", "Money from products priced above market: the AC markup and the women's income on those products. An upper bound: some sales may continue."],
+  ["Gross markup", `The AC's ${pct(c.markup, 0)} on the SHG price: its only income, before any AC cost. Not profit.`],
+  ["Secure gross markup", "Gross markup from products priced OK. Whether it covers an AC's costs is unknown until costs are collected."],
+  ["Multi-pack", "Several units sold as one online order, so they share one courier charge."],
+  ["Floor / ceiling", "Floor: products priced OK after re-linking alone (no buyers needed). Ceiling: once every pack is accepted and every bulk unit has a buyer."],
   ["Transport band", `Transport to the warehouse is charged by distance band (${c.bands.map((b) => inr(b.ratePerKg)).join(" / ")} per kg), not per km. Moving closer only helps if it changes the band.`],
   ["Assumption", "A value the case does not give (for example packaging cost). Marked with a grey tag and editable under Assumptions."],
   ["To collect", "Data UPSRLM must gather (warehouse costs, capacity, buyers). Never filled with made-up numbers."],
 ];
 
 export default function Start() {
-  const { state, set, hydrated } = useStore();
+  const { state, set } = useStore();
   const m = useModel();
-  if (!hydrated) return <Loading />;
-  const s0 = m.results.S0.summary;
   const total = m.results.S0.rows.length;
-  const bulk = m.bulkDemandS3;
-  const needed = bulk.reduce((t, b) => t + b.unitsNeeded, 0);
-  const confirmed = bulk.reduce((t, b) => t + Math.min(b.confirmed, b.unitsNeeded), 0);
   const stores = state.levers.prernaStores;
 
   return (
@@ -75,19 +74,9 @@ export default function Start() {
         This app shows which products will then cost more than the market, and what to change so they keep selling and the women keep earning.
       </p>
 
-      <div className="my-5 grid grid-cols-1 gap-3 md:grid-cols-3">
-        <div className="rounded border border-orange/40 bg-orange/5 p-3">
-          <div className="text-[11px] font-semibold text-grey uppercase">If nothing changes</div>
-          <div className="mt-1 text-[15px]"><b className="text-orange">{num(total - s0.competitiveCount)} of {num(total)}</b> products cost more than the market.</div>
-        </div>
-        <div className="rounded border border-orange/40 bg-orange/5 p-3">
-          <div className="text-[11px] font-semibold text-grey uppercase">Warehouse income at risk</div>
-          <div className="mt-1 text-[15px]"><b className="text-orange">{inr(s0.acMarkupAtRisk)}</b> a month of {inr(s0.acMarkupTotal)}.</div>
-        </div>
-        <div className="rounded border border-orange/40 bg-orange/5 p-3">
-          <div className="text-[11px] font-semibold text-grey uppercase">Women&apos;s income at risk</div>
-          <div className="mt-1 text-[15px]"><b className="text-orange">{inr(s0.shgIncomeAtRisk)}</b> a month, earned by {num(s0.womenActiveAtRisk)} women.</div>
-        </div>
+      <div className="my-5 space-y-3">
+        <HeadlineCards />
+        <ExposureSplit />
       </div>
 
       <Section title="Two root causes, two fixes">
@@ -97,13 +86,14 @@ export default function Start() {
             Many SHGs in central and eastern UP still send goods to Bijnor because they were linked before Lucknow opened. Transport is charged by distance band, so switching them to Lucknow cuts the cost.
           </div>
           <div className="rounded border border-line p-3 text-[13px]">
-            <div className="font-semibold text-navy">2. Wrong sales channel → Fix sales channels</div>
-            Cheap, heavy staples (atta, jaggery, mustard oil, masala, detergent) pay {inr(m.data.rateCard.onlineFirstKg)}+ courier per online order. Sold in bulk by truck at {inr(m.data.rateCard.bulkPerKg)}/kg, they fit under the market price.
+            <div className="font-semibold text-navy">2. Courier cost on cheap, heavy staples → multi-packs and buyer-backed bulk</div>
+            Atta, jaggery, mustard oil, garam masala and detergent pay {inr(m.data.rateCard.onlineFirstKg)}+ courier per online order. Jaggery and garam masala fit under market as online multi-packs (one parcel, several units).
+            Atta, detergent and mustard oil fit in bulk by truck at {inr(m.data.rateCard.bulkPerKg)}/kg, but only once an institution commits to buy.
           </div>
         </div>
       </Section>
 
-      <Section title="The four plans" note="Pick a plan with the Plan buttons at the top of any page. Overview, Prices & channels and Compare plans then show that plan.">
+      <Section title="The plans" note="Pick a plan with the Plan buttons at the top of any page. The hybrid's count depends on buyers: shown here with no bulk buyer yet and 75% pack acceptance (assumption).">
         <TableWrap>
           <table className="tbl">
             <thead>
@@ -137,38 +127,20 @@ export default function Start() {
         </TableWrap>
       </Section>
 
-      <Section title="Can products really move from online to bulk, if orders today are mostly online?">
-        <div className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+      <Section title="If orders today are mostly online, how can anything move to bulk?">
+        <div className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
           <div className="space-y-2 text-[13px] leading-relaxed">
             <p>
-              <b>Not by flipping a switch.</b> Today&apos;s online customers will not turn into bulk buyers. The point is different: from October 2027 these staples will cost more online than in a local shop,
-              so <b>online sales are likely to fall anyway</b>. The question is whether someone else will buy them in bulk at the lower bulk price.
+              <b>It can&apos;t be switched overnight</b>, and the recommended plan doesn&apos;t try to. Today&apos;s online customers will not become bulk buyers.
+              So the plan <b>fixes the AC links now</b> (no buyers needed) and <b>moves products only when buyers commit</b>:
             </p>
-            <p><b>Who could buy in bulk:</b> Prerna Saras stores ({num(stores)} across UP), Prerna canteens, government buyers through GeM SARAS, hostels, hotels, and corporate gift boxes (Prerna 365).</p>
-            <p>
-              <b>Rule in this app:</b> a move to bulk is a <b>target until a buyer commits</b>. Record buyers and their letters of intent or purchase orders under Buyers &amp; gift boxes;
-              the app shows how much of the bulk volume is confirmed. The research suggests piloting in a small group of stores first; switch the rest only when the orders are real.
-            </p>
-            <p className="text-grey">Products that already sell well online (honey, brass, zari, chikankari, sarees, ghee, toys) stay online.</p>
-          </div>
-          <div className="rounded border border-line p-3 text-[13px]">
-            <div className="text-[11px] font-semibold text-grey uppercase">Recommended plan: bulk volume needed vs confirmed</div>
-            <div className="mt-1 text-2xl font-bold text-navy">{num(confirmed)} <span className="text-[14px] font-semibold text-grey">of {num(needed)} units a month confirmed</span></div>
-            <div className="mt-2 h-2 w-full rounded bg-tint">
-              <div className="h-2 rounded bg-navy" style={{ width: `${needed ? Math.min(100, (confirmed / needed) * 100) : 0}%` }} />
-            </div>
-            <ul className="mt-2 space-y-0.5">
-              {bulk.map((b) => (
-                <li key={b.shgId} className="flex justify-between gap-2">
-                  <span>{b.shgId} {b.product}</span>
-                  <span className={clsx("tabular-nums", b.gap > 0 ? "text-orange" : "text-ok")}>{num(Math.min(b.confirmed, b.unitsNeeded))} / {num(b.unitsNeeded)}</span>
-                </li>
-              ))}
+            <ul className="list-disc space-y-1 pl-5">
+              <li><b>Jaggery and garam masala stay online as multi-packs</b>: several units share one courier parcel, which brings the price per unit under market.</li>
+              <li><b>Atta, detergent and mustard oil move to institutional bulk</b> (canteens, hostels, offices, government buyers on GeM SARAS) <b>only after a buyer signs</b> a letter of intent or purchase order. Until then they keep selling online.</li>
             </ul>
-            <p className="mt-2 text-grey">
-              That is about {num(needed / stores, 1)} units per Prerna Saras store per month. <Link className="text-navy underline" href="/buyers">Record buyers and orders</Link>.
-            </p>
+            <p>Products that already sell well online (honey, brass, zari, chikankari, sarees, ghee, toys) stay online. Prerna Saras stores ({num(stores)}) are one more outlet to test.</p>
           </div>
+          <BulkComparison />
         </div>
       </Section>
 

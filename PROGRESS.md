@@ -1,6 +1,6 @@
 # PROGRESS: Prerna 360
 
-_Last updated: 26 Nov 2026_
+_Last updated: 27 Nov 2026_
 
 ## Status
 Working prototype covering the MVP decision flow (M0–M6 plus parts of M7), built for the submission deadline.
@@ -23,6 +23,44 @@ Vercel's serverless file system. Instead:
 - `npm run seed` reads `context/prerna_dataset.xlsx` (checksum-guarded) and the workbook's analyst attributes into `src/data/case-data.json`; a test re-reads the workbook and asserts equality.
 - User inputs (opex, capacity, buyers, boxes, commitments, what-if overrides, levers) are kept in the browser (`localStorage`). Money inputs are stored in integer paise.
 - Moving these to Postgres (Neon / Vercel Postgres) with Prisma is the first post-submission task; the engine is unaffected.
+
+## v2: aligned with the final GDi Partners submission (branch `claude/v2-hybrid`, P0 done)
+Brief: `PRERNA360_V2_BRIEF.md`; expected values: `context_v2/golden_v2.json`.
+- **New recommended plan `SH`, "Fix links + buyer-backed hybrid"**:
+  - re-link 7 SHGs;
+  - jaggery 3-pack and garam masala 4-pack stay online;
+  - atta, detergent and mustard oil move to bulk **only when a buyer commits**.
+  - The config is in `src/data/hybrid-plan.json`; the engine is in `src/lib/engine/hybrid.ts`.
+- **Commitment gate:** volume is split into segments.
+  - Bulk volume without a buyer stays online, priced above market and at risk.
+  - Multi-pack decliners are lost volume.
+  - A product counts as competitive only if all its sold volume is at or below market.
+  - Inputs: `packAcceptance` (default 75%) and `bulkSecured` (default 0%, raised automatically by LoI-or-later orders).
+- **Plan names:** S1 is now "Fix links (floor)" and S3 is "Fix links + all staples to bulk" (no longer recommended). The default plan is SH. The store key is now `prerna360:v2`; v1 inputs are migrated, and a stored S3 view becomes SH.
+- **Demand panel** (Overview and Compare plans): three presets (17 / 17 / 20) and the blanket-bulk comparison at 0–100% secured.
+- **Overview and Start** lead with Floor 15/20, ₹42,400 freight (passed to buyers, not AC income) and Ceiling 20/20. They also show:
+  - exposure as an upper bound split >5% vs 0–5% above market;
+  - the "3 products above market even at zero markup" line;
+  - hybrid 1,050 (1.9 per store) vs blanket 2,250 (4.1 per store).
+- **`/start` and every page render on the server with default numbers;** user inputs hydrate after.
+- **Branding:**
+  - GDi Partners naming, with the credit line in the header and footer;
+  - deck palette: off-white `#F7F5F0` and slate `#4A5568`;
+  - no contact details shown.
+- **Wording:** "gross markup (not profit)"; −0.74 as an association, not causation; 80% as an aspiration agreed SHG by SHG.
+- **Headroom price-rise** sits behind "Advanced analysis", closed by default and labelled "not part of the recommendation". The engine code and tests are kept.
+- **Stress tests** now run on the hybrid at full commitment. The S3 golden values are still asserted in the tests.
+- **Tests:**
+  - `tests/golden_v2.test.ts` (29 tests read `golden_v2.json`);
+  - e2e: the default plan is SH, 15 → 20, 100% bulk secured gives 20/20, server-rendered `/start`, advanced analysis hidden.
+  - Totals: **57 unit, golden and parity tests and 5 e2e tests.**
+- **Known gap between the pack's files:** `recompute_oracle.py` gives a different working capital (₹10.6–17.8 lakh on a value basis) and units per ₹1 lakh (3,418 / 2,392, rounded up) from `golden_v2.json` (₹10.3 / 13.7 / 17.0 lakh; 3,417 / 2,391). The app follows the golden file and the brief §4 formula, which match the deck.
+- **P1 not started:**
+  - working-capital panel and transfer bridge on `/ac-pnl`;
+  - `/pilot` tracker;
+  - inclusion chart and KPI scorecard;
+  - gift-box presets;
+  - workbook mapping on `/data`.
 
 ## Plain-language pass (for Prerna staff)
 - Plans renamed: Today (S0) · Fix links (S1) · Fix channels (S2) · Fix both, recommended (S3); a banner on plan-driven pages says which plan is shown and what it changes.

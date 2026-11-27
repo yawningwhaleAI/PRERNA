@@ -1,16 +1,15 @@
 "use client";
 
 import clsx from "clsx";
-import { HowTo, Kpi, Loading, Note, PageHeader, Pill, Section, TableWrap } from "@/components/ui";
+import { HowTo, Kpi, Note, PageHeader, Pill, Section, TableWrap } from "@/components/ui";
 import { acVolumes, type AcName } from "@/lib/engine";
 import { inr, num, signedPct } from "@/lib/format";
 import { useModel } from "@/lib/model";
 import { useStore } from "@/lib/store";
 
 export default function WarehouseLinks() {
-  const { state, set, hydrated } = useStore();
+  const { state, set } = useStore();
   const m = useModel();
-  if (!hydrated) return <Loading />;
   const plan = m.results.S1.plan; // recommended warehouse per SHG, including any manual choice
   const vol = 1 + state.levers.volumeChange;
   const before = acVolumes(m.data.shgs, (s) => s.linkedAc, vol);

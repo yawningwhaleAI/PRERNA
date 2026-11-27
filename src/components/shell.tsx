@@ -9,6 +9,9 @@ import { DEFAULT_LEVERS, SCENARIOS } from "@/lib/engine";
 import { useStore } from "@/lib/store";
 import { LeversDrawer } from "./levers-drawer";
 
+/** Credit line (P0-5). Contact details are deliberately not shown. */
+export const CREDIT = "Prototype by Aryan Singh for the GDi Partners Consultant case, Round 1 · not an official Government of Uttar Pradesh website";
+
 export const NAV = [
   { href: "/start", label: "Start here", hint: "What this app does and how to use it" },
   { href: "/command-centre", label: "Overview", hint: "Is the plan working? What needs attention?" },
@@ -40,17 +43,17 @@ export function Shell({ children, hasUpEmblem = false }: { children: ReactNode; 
               // eslint-disable-next-line @next/next/no-img-element
               <img src="/up-emblem.png" alt="Government of Uttar Pradesh" width={40} height={40} className="h-10 w-10 object-contain" />
             )}
-            <Image src="/gdi.png" alt="GDi" width={40} height={40} priority />
+            <Image src="/gdi.png" alt="GDi Partners" width={40} height={40} priority />
             <div className="leading-tight">
               <div className="text-[15px] font-bold text-navy">Prerna 360</div>
-              <div className="text-[10.5px] text-grey">Helps UPSRLM run the Bijnor and Lucknow warehouses</div>
-              <div className="text-[9.5px] font-semibold text-orange">Prototype · not an official Government of Uttar Pradesh website</div>
+              <div className="text-[10.5px] text-grey">Helps UPSRLM run the Bijnor and Lucknow aggregation centres</div>
+              <div className="text-[9.5px] font-semibold text-orange">{CREDIT}</div>
             </div>
           </Link>
-          <div className="ml-auto flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-1.5" role="group" aria-label="Plan">
+          <div className="flex min-w-0 flex-wrap items-center gap-3 md:ml-auto">
+            <div className="flex min-w-0 items-center gap-1.5" role="group" aria-label="Plan">
               <span className="text-[11px] font-semibold text-grey uppercase">Plan</span>
-              <div className="flex overflow-hidden rounded border border-navy">
+              <div className="flex min-w-0 flex-wrap gap-px overflow-hidden rounded border border-navy bg-navy">
                 {SCENARIOS.map((s) => (
                   <button
                     key={s.id}
@@ -63,7 +66,7 @@ export function Shell({ children, hasUpEmblem = false }: { children: ReactNode; 
                     )}
                   >
                     {s.short}
-                    {s.id === "S3" && <span className={clsx("ml-1 text-[9px] uppercase", state.scenario === s.id ? "text-white/80" : "text-orange")}>recommended</span>}
+                    {s.recommended && <span className={clsx("ml-1 text-[9px] uppercase", state.scenario === s.id ? "text-white/80" : "text-orange")}>recommended</span>}
                   </button>
                 ))}
               </div>
@@ -100,7 +103,12 @@ export function Shell({ children, hasUpEmblem = false }: { children: ReactNode; 
             All money is ₹ per month unless stated. Case data are illustrative. Every number is calculated from the case data and the assumptions.
           </div>
         </nav>
-        <main className="min-w-0 flex-1 px-4 py-5 md:px-6">{children}</main>
+        <main className="flex min-w-0 flex-1 flex-col px-4 py-5 md:px-6">
+          <div className="flex-1">{children}</div>
+          <footer className="mt-8 border-t border-line pt-3 text-[11px] text-grey">
+            {CREDIT}. Case data are illustrative; every number is calculated from the case dataset and the stated assumptions.
+          </footer>
+        </main>
       </div>
       <LeversDrawer open={open} onClose={() => setOpen(false)} />
     </div>

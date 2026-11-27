@@ -67,7 +67,7 @@ export const SEED_BOXES: Box[] = [
 const emptyOpex = (): OpexPaise => ({ variable: {}, fixed: {} });
 
 export const INITIAL_STATE: AppState = {
-  scenario: "S3",
+  scenario: "SH",
   levers: DEFAULT_LEVERS,
   acOverrides: {},
   opex: { Bijnor: emptyOpex(), Lucknow: emptyOpex() },
@@ -78,7 +78,8 @@ export const INITIAL_STATE: AppState = {
   useCommitted: false,
 };
 
-const KEY = "prerna360:v1";
+const KEY = "prerna360:v2";
+const OLD_KEYS = ["prerna360:v1"];
 
 interface Ctx {
   state: AppState;
@@ -98,9 +99,22 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     try {
-      const raw = window.localStorage.getItem(KEY);
+      let raw = window.localStorage.getItem(KEY);
+      let migrated = false;
+      if (!raw) {
+        // v1 → v2: keep the user's inputs, but do not keep S3 ("all staples to bulk") as the plan in view.
+        for (const k of OLD_KEYS) {
+          const old = window.localStorage.getItem(k);
+          if (old) {
+            raw = old;
+            migrated = true;
+            break;
+          }
+        }
+      }
       if (raw) {
         const saved = JSON.parse(raw) as Partial<AppState>;
+        if (migrated && (saved.scenario === "S3" || !saved.scenario)) saved.scenario = "SH";
         setState((s) => ({ ...s, ...saved, levers: { ...DEFAULT_LEVERS, ...(saved.levers ?? {}) } }));
       }
     } catch {

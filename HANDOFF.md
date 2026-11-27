@@ -1,6 +1,13 @@
 # HANDOFF: Prerna 360 (context for the next Claude session)
 
-_Written 26 Nov 2026 at the end of the first build session. Read this first, then `CLAUDE.md` (project rules) and `PROGRESS.md` (status log)._
+_Written 26 Nov 2026; updated 27 Nov 2026 for v2. Read this first, then `CLAUDE.md` (project rules), `PROGRESS.md` (status log) and `PRERNA360_V2_BRIEF.md` (v2 brief)._
+
+> **v2 status (27 Nov):** branch **`claude/v2-hybrid`** (from `claude/sleepy-cannon-ebzzjh`) holds P0 of the v2 brief.
+> - The recommended plan is now **SH, the buyer-backed hybrid**; S3 is "all staples to bulk".
+> - It is deployed as a Vercel **preview** only.
+> - **Production (the deck's QR code) still serves the v1 commit `469f261`.** Do not merge to `main` or promote to production until the user says so.
+> - The P0 details are in `PROGRESS.md`. P1 and P2 have not started.
+
 
 ## 1. What this is
 **Prerna 360** is a decision-support web app built for a GDi consulting case (Round 1) about UPSRLM's two Prerna
@@ -21,7 +28,7 @@ The app answers five monthly questions:
 |---|---|
 | Live app | **https://prerna360.vercel.app** (production, Vercel) |
 | GitHub repo | `yawningwhaleAI/PRERNA` |
-| Working branch | `claude/sleepy-cannon-ebzzjh` (all work is here; **`main` only has the original upload**) |
+| Working branches | `claude/sleepy-cannon-ebzzjh` (v1, in production) and **`claude/v2-hybrid`** (v2 P0, preview only). `main` has the original upload and the v2 pack folder `Prerna360_v2_Update_Pack/` |
 | Vercel team / project | team `yawningwhaleais-projects` (`team_LrapGCFaytqZ7NwOY2EHMip3`), project `prerna360` (`prj_Ztq4cso3dcfAhrlVUI6VKs0YUDGM`), linked to the GitHub repo, production branch `main` |
 | Latest production deploy | commit `469f261`, deployment `dpl_FRuqDg1bo4CTr5aQc9sSEPwGMG7A` (READY) |
 
@@ -174,6 +181,10 @@ on team `team_LrapGCFaytqZ7NwOY2EHMip3`.
 - Keep Playwright pinned at `1.63.0` to match `/opt/pw-browsers`.
 
 ## 11. Open items / next steps
+0. **v2:**
+   - The user reviews the preview, then says whether to promote it to production.
+   - After that, P1 of `PRERNA360_V2_BRIEF.md`: AC finances bridge and working capital, `/pilot`, inclusion screens, gift-box presets, and workbook mapping on `/data`.
+   - Engine helpers for P1 already exist and are tested in `engine/hybrid.ts` (`acTransfer`, `workingCapitalHybrid`), `engine/boxes.ts` (`boxAsOnlineOrders`) and `engine/social.ts` (`lowestParticipation`).
 1. **UP emblem:** the user must add `public/up-emblem.png` to the branch; then redeploy.
 2. **Merge to `main`** (ask the user; a PR has not been created) so Vercel auto-deploys.
 3. Post-submission:

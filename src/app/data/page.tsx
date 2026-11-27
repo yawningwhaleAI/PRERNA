@@ -1,6 +1,6 @@
 "use client";
 
-import { Loading, Note, PageHeader, Pill, Section, TableWrap } from "@/components/ui";
+import { Note, PageHeader, Pill, Section, TableWrap } from "@/components/ui";
 import { dataQuality, SCENARIOS } from "@/lib/engine";
 import { inr, num } from "@/lib/format";
 import { CASE, useModel } from "@/lib/model";
@@ -17,9 +17,8 @@ function downloadCsv(name: string, rows: (string | number)[][]) {
 }
 
 export default function DataPage() {
-  const { state, hydrated, resetAll } = useStore();
+  const { state, resetAll } = useStore();
   const m = useModel();
-  if (!hydrated) return <Loading />;
   const checks = dataQuality(CASE);
   const card = CASE.rateCard;
   const exportScenario = () => {

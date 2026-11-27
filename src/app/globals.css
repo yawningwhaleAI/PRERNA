@@ -5,7 +5,8 @@
   --color-navy-dark: #163553;
   --color-orange: #cb3500;
   --color-tint: #e9eef4;
-  --color-grey: #595959;
+  --color-grey: #4a5568;
+  --color-offwhite: #f7f5f0;
   --color-line: #d5dde6;
   --color-ok: #2e6b3f;
   --font-sans: var(--font-inter), Arial, Helvetica, sans-serif;
@@ -16,7 +17,7 @@
 }
 
 body {
-  background: #ffffff;
+  background: #f7f5f0;
   color: #1f2933;
   font-feature-settings: "tnum" 1;
 }

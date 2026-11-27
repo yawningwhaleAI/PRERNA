@@ -107,12 +107,14 @@ export function evaluateGated(
     thinHeadroom: uniq(base.thinHeadroom),
   };
 
-  // One display row per product: totals of its segments, prices of its target channel.
+  // One display row per product: totals of its segments; prices of the channel buyers actually see
+  // (the plan's channel, or online while a gated product still has volume without a buyer).
   const rows: ScenarioRow[] = full.map((target) => {
     const seg = segments.filter((x) => x.shgId === target.shgId);
     const sum = (k: keyof ScenarioRow) => seg.reduce((t, x) => t + (x[k] as number), 0);
+    const live = gated.has(target.shgId) && c < 1 ? seg.find((x) => x.channel === "Online") ?? target : target;
     return {
-      ...target,
+      ...live,
       competitive: compIds.includes(target.shgId),
       units: sum("units"),
       kg: sum("kg"),

@@ -1,7 +1,7 @@
 "use client";
 
 import clsx from "clsx";
-import { HowTo, Loading, Note, PageHeader, Section, TableWrap, ToCollect } from "@/components/ui";
+import { HowTo, Note, PageHeader, Section, TableWrap, ToCollect } from "@/components/ui";
 import { FIXED_COST_LINES, VARIABLE_COST_LINES, workingCapital, type AcName, type AcPnl } from "@/lib/engine";
 import { inr, num, pct, toPaise } from "@/lib/format";
 import { useModel } from "@/lib/model";
@@ -10,11 +10,10 @@ import { useStore } from "@/lib/store";
 const ACS: AcName[] = ["Bijnor", "Lucknow"];
 
 export default function AcPnlPage() {
-  const { state, set, hydrated } = useStore();
+  const { state, set } = useStore();
   const m = useModel();
-  if (!hydrated) return <Loading />;
   const cols: { key: string; p: AcPnl }[] = [];
-  for (const sc of ["S0", "S3"] as const) for (const ac of ACS) cols.push({ key: `${ac}, ${sc === "S0" ? "today" : "recommended"}`, p: m.pnl(sc, ac) });
+  for (const sc of ["S0", "SH"] as const) for (const ac of ACS) cols.push({ key: `${ac}, ${sc === "S0" ? "today" : "hybrid"}`, p: m.pnl(sc, ac) });
 
   const setCost = (ac: AcName, kind: "variable" | "fixed", line: string, raw: string) =>
     set("opex", (o) => ({
@@ -33,7 +32,7 @@ export default function AcPnlPage() {
     </tr>
   );
 
-  const wc = (["S0", "S3"] as const).map((sc) => {
+  const wc = (["S0", "SH"] as const).map((sc) => {
     const s = m.results[sc].summary;
     const pay = s.byAc.Bijnor.shgPayments + s.byAc.Lucknow.shgPayments;
     return { sc, pay, logi: s.logisticsOutlay };
@@ -41,18 +40,18 @@ export default function AcPnlPage() {
 
   return (
     <div>
-      <PageHeader title="Warehouse finances" question="Does each warehouse earn enough to cover its costs? Today vs the recommended plan." />
+      <PageHeader title="Warehouse finances" question="How much gross markup does each AC earn, and what must be known before anyone can say it covers its costs?" />
 
       <HowTo
         steps={[
-          <>Each warehouse earns {pct(m.data.rateCard.markup, 0)} of the SHG price on every unit it sells. Transport is paid by the buyer, so it is not income.</>,
+          <>Each AC earns a gross markup of {pct(m.data.rateCard.markup, 0)} of the SHG price on every unit it sells. That is <b>not profit</b>: no AC cost is in the case. Transport is paid by the buyer.</>,
           <><b>Warehouse managers:</b> type your real monthly costs in the right-hand table (rent, salaries, packaging…). Leave a line blank if you don&apos;t know it yet: the app never guesses.</>,
           <>Once costs are in, the left table shows the monthly <b>profit or loss</b> and how many units the warehouse must sell to <b>break even</b>.</>,
         ]}
       />
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
-        <Section title="Income and costs, ₹ per month" note="Safe income counts only products priced at or below market: it is what a warehouse can rely on. Costs are not in the case data.">
+        <Section title="Gross markup and costs, ₹ per month" note="Secure gross markup counts only products priced at or below market (hybrid: current pack acceptance and secured bulk). Costs are not in the case data, so no AC can yet be called viable or not.">
           <TableWrap>
             <table className="tbl">
               <thead>
@@ -65,8 +64,8 @@ export default function AcPnlPage() {
                 {row("Sales value (what buyers pay)", (p) => inr(p.gmv))}
                 {row("less: paid to SHGs", (p) => inr(p.shgPayments))}
                 {row("less: transport (charged to buyers)", (p) => inr(p.logistics))}
-                {row("Warehouse income, all products", (p) => inr(p.markup))}
-                {row("Safe income (products priced OK)", (p) => <b>{inr(p.markupSecure)}</b>)}
+                {row("AC gross markup, all products sold", (p) => inr(p.markup))}
+                {row("Secure gross markup (products priced OK)", (p) => <b>{inr(p.markupSecure)}</b>)}
                 {row("less: variable costs", (p) => (p.variableEntered ? inr(p.variableCosts) : <ToCollect />))}
                 {row("Left after variable costs", (p) => <b>{inr(p.contribution)}</b>)}
                 {row("less: fixed costs", (p) => (p.fixedCosts === null ? <ToCollect /> : inr(p.fixedCosts)))}
@@ -77,7 +76,7 @@ export default function AcPnlPage() {
                   p.breakEvenUnits === null ? <ToCollect>costs needed</ToCollect> : Number.isFinite(p.breakEvenUnits) ? num(p.breakEvenUnits) : "not reachable",
                 )}
                 {row("Covers fixed costs how many times?", (p) => (p.opexCoverage === null ? <ToCollect>costs needed</ToCollect> : `${p.opexCoverage.toFixed(2)}×`))}
-                {row("Safe income = how many minimum-wage salaries", (p) => num(p.staffYardstick, 1))}
+                {row("Secure gross markup = how many minimum-wage salaries (yardstick)", (p) => num(p.staffYardstick, 1))}
               </tbody>
             </table>
           </TableWrap>
@@ -142,7 +141,7 @@ export default function AcPnlPage() {
       <Section title="Cash needed to run both warehouses" note="Assumption: the warehouse pays SHGs when goods arrive and pays transport when it ships, but buyers pay later. The longer buyers take, the more cash is tied up.">
         <TableWrap>
           <table className="tbl max-w-2xl">
-            <thead><tr><th>If buyers pay after…</th>{wc.map((w) => <th key={w.sc} className="r">{w.sc === "S0" ? "Today" : "Recommended plan"}</th>)}</tr></thead>
+            <thead><tr><th>If buyers pay after…</th>{wc.map((w) => <th key={w.sc} className="r">{w.sc === "S0" ? "Today" : "Hybrid (current inputs)"}</th>)}</tr></thead>
             <tbody>
               {[15, 30, 45].map((d) => (
                 <tr key={d}><td>{d} days, cash tied up</td>{wc.map((w) => <td key={w.sc} className="r tabular-nums">{inr(workingCapital(w.pay, w.logi, d))}</td>)}</tr>

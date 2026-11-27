@@ -1,7 +1,8 @@
 "use client";
 
 import clsx from "clsx";
-import { HowTo, Loading, Note, PageHeader, Section, TableWrap } from "@/components/ui";
+import { HowTo, Note, PageHeader, Section, TableWrap } from "@/components/ui";
+import { DemandPanel } from "@/components/demand-panel";
 import { SCENARIOS, type ScenarioSummary } from "@/lib/engine";
 import { inr, num, pct } from "@/lib/format";
 import { useModel } from "@/lib/model";
@@ -12,26 +13,25 @@ type Row = [string, (s: ScenarioSummary, s0: ScenarioSummary) => string, boolean
 const ROWS: Row[] = [
   ["Products priced at or below market", (s) => num(s.competitiveCount)],
   ["Products only just below market (thin margin)", (s) => num(s.thinHeadroom.length)],
-  ["Warehouse income, all products", (s) => inr(s.acMarkupTotal)],
-  ["Warehouse income at risk", (s) => inr(s.acMarkupAtRisk), true],
+  ["AC gross markup, all products sold (not profit)", (s) => inr(s.acMarkupTotal)],
+  ["AC gross markup at risk", (s) => inr(s.acMarkupAtRisk), true],
   ["Women's income at risk", (s) => inr(s.shgIncomeAtRisk), true],
   ["Earning women whose product is above market", (s) => num(s.womenActiveAtRisk), true],
   ["Transport cost (added to prices)", (s) => inr(s.logisticsOutlay)],
   ["Transport cost vs today", (s, s0) => pct(s.logisticsOutlay / s0.logisticsOutlay - 1)],
   ["Bijnor: SHGs linked", (s) => num(s.byAc.Bijnor.shgs)],
   ["Lucknow: SHGs linked", (s) => num(s.byAc.Lucknow.shgs)],
-  ["Bijnor: warehouse income", (s) => inr(s.byAc.Bijnor.markup)],
-  ["Lucknow: warehouse income", (s) => inr(s.byAc.Lucknow.markup)],
-  ["Bijnor: safe income (products priced OK)", (s) => inr(s.byAc.Bijnor.markupSecure)],
-  ["Lucknow: safe income (products priced OK)", (s) => inr(s.byAc.Lucknow.markupSecure)],
+  ["Bijnor: gross markup", (s) => inr(s.byAc.Bijnor.markup)],
+  ["Lucknow: gross markup", (s) => inr(s.byAc.Lucknow.markup)],
+  ["Bijnor: secure gross markup (products priced OK)", (s) => inr(s.byAc.Bijnor.markupSecure)],
+  ["Lucknow: secure gross markup (products priced OK)", (s) => inr(s.byAc.Lucknow.markupSecure)],
   ["Bijnor: transport cost", (s) => inr(s.byAc.Bijnor.logistics)],
   ["Lucknow: transport cost", (s) => inr(s.byAc.Lucknow.logistics)],
 ];
 
 export default function Scenarios() {
-  const { state, set, hydrated } = useStore();
+  const { state, set } = useStore();
   const m = useModel();
-  if (!hydrated) return <Loading />;
   const s0 = m.results.S0.summary;
   const cur = m.current;
   return (
@@ -41,8 +41,9 @@ export default function Scenarios() {
       <HowTo
         steps={[
           <>Each column is one plan. Read across a row to see how a plan changes it. Click a column heading to make it the plan shown on every page.</>,
-          <><b>Today</b> = no changes. <b>Fix links</b> = SHGs use the warehouse with cheaper transport. <b>Fix channels</b> = staples too expensive online are sold in bulk. <b>Fix both</b> = the recommended plan.</>,
-          <>&quot;What if things get worse?&quot; tests whether the recommended plan still holds if transport rates rise or sales fall.</>,
+          <><b>Today</b> = no changes. <b>Fix links</b> = re-link 7 SHGs (the floor). <b>Fix channels</b> = staples to bulk at today&apos;s ACs. <b>All staples to bulk</b> = re-link plus blanket bulk. <b>Hybrid</b> = the recommendation.</>,
+          <>The hybrid column depends on buyers. Set <b>pack acceptance</b> and <b>bulk secured</b> in the demand panel below, or pick a preset.</>,
+          <>&quot;What if things get worse?&quot; tests the hybrid once all its buyers have committed, against higher transport rates or lower sales.</>,
         ]}
       />
 
@@ -68,7 +69,7 @@ export default function Scenarios() {
                   {SCENARIOS.map((sc) => {
                     const s = m.results[sc.id].summary;
                     const v = f(s, s0);
-                    const isRisk = risk && (label.startsWith("Earning") ? s.womenActiveAtRisk > 0 : (label.includes("Warehouse") ? s.acMarkupAtRisk : s.shgIncomeAtRisk) > 0);
+                    const isRisk = risk && (label.startsWith("Earning") ? s.womenActiveAtRisk > 0 : (label.includes("markup") ? s.acMarkupAtRisk : s.shgIncomeAtRisk) > 0);
                     return (
                       <td key={sc.id} className={clsx("r tabular-nums", isRisk && "above-market", state.scenario === sc.id && "font-semibold")}>
                         {v}
@@ -81,14 +82,18 @@ export default function Scenarios() {
           </table>
         </TableWrap>
         <Note>
-          Transport is passed on to buyers, so total warehouse income is the same in every plan. What changes is how much of it is <b>safe</b>: income from products priced above market is at risk because they may not sell.
-          Fix both prices every product at or below market, but only works if the staples find bulk buyers (see Prices &amp; channels) and shops accept the margin.
+          Transport is passed on to buyers, so gross markup is the same in every plan except where hybrid multi-pack buyers decline (lost volume). What changes is how much is <b>secure</b>: markup on products priced above market is at risk.
+          Gross markup is not profit: AC costs are not in the case. &quot;All staples to bulk&quot; shows 20 of 20 only if every staple unit finds a bulk buyer; the hybrid needs buyers for fewer units.
         </Note>
       </Section>
 
+      <Section title="Demand scenarios for the recommended hybrid" note="A product counts as priced OK only if all its volume sells at or below market. Bulk volume without a buyer keeps selling online; buyers who decline a multi-pack are lost volume.">
+        <DemandPanel />
+      </Section>
+
       <Section
-        title="What if things get worse? (recommended plan)"
-        note="Keeps the Fix both decisions as they are, then raises transport rates or cuts sales on top of the current assumptions."
+        title="What if things get worse? (hybrid, once all its buyers commit)"
+        note="Keeps the hybrid's decisions as they are (packs accepted, bulk orders signed), then raises transport rates or cuts sales on top of the current assumptions."
       >
         <TableWrap>
           <table className="tbl">
@@ -97,8 +102,8 @@ export default function Scenarios() {
                 <th>If…</th>
                 <th className="r">Products priced OK</th>
                 <th>Pushed above market</th>
-                <th className="r">Warehouse income</th>
-                <th className="r">Warehouse income at risk</th>
+                <th className="r">Gross markup</th>
+                <th className="r">Gross markup at risk</th>
                 <th className="r">Women&apos;s income at risk</th>
                 <th className="r">Transport cost</th>
               </tr>
@@ -138,7 +143,7 @@ export default function Scenarios() {
                 <th className="r">Market price</th>
                 <th className="r">Below market by</th>
                 <th className="r">Units</th>
-                <th className="r">Warehouse earns / month</th>
+                <th className="r">AC gross markup / month</th>
                 <th className="r">Women earn / month</th>
                 <th className="r">Transport / month</th>
                 <th className="r">Earning women</th>
