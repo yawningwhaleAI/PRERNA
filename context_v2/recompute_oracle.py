@@ -91,7 +91,7 @@ O["ac_before"] = acstats(AC0); O["ac_after"] = acstats(AC1)
 O["markup_moved"] = O["ac_before"]["Bijnor"]["markup"] - O["ac_after"]["Bijnor"]["markup"]
 for a in ["Bijnor", "Lucknow"]:
     m = O["ac_after"][a]["markup"] / O["ac_after"][a]["units"]
-    O[f"{a}_markup_per_unit_after"] = round(m, 1); O[f"{a}_units_per_1lakh"] = math.ceil(100000 / m)
+    O[f"{a}_markup_per_unit_after"] = round(m, 1); O[f"{a}_units_per_1lakh"] = round(100000 / m)
 O["lucknow_units_pct"] = round((O["ac_after"]["Lucknow"]["units"] / O["ac_before"]["Lucknow"]["units"] - 1) * 100, 1)
 O["lucknow_kg_pct"] = round((O["ac_after"]["Lucknow"]["kg"] / O["ac_before"]["Lucknow"]["kg"] - 1) * 100, 1)
 O["bijnor_markup_change_pct"] = round((O["ac_after"]["Bijnor"]["markup"] / O["ac_before"]["Bijnor"]["markup"] - 1) * 100, 1)
@@ -122,20 +122,21 @@ O["blanket_half"] = dict(markup_at_risk=0.5 * O["staples_markup"], income_at_ris
 O["strand_C_shg_payout"] = sum(d["P"] * d["u"] for d in D if d["id"] in ["SHG-06", "SHG-09", "SHG-16"])
 O["prerna_stores_per_unit"] = (round(O["blanket_units"] / 543, 1), round(O["hybrid_units"] / 543, 1))
 
-# working capital (hybrid; bulk paid in N days, online in 15)
+# working capital (deck method): hybrid channels incl. multi-packs; bulk share weighted by SHG-price value
 bulkset = {d["id"] for d in D if d["ch"] == "Bulk"} | {"SHG-06", "SHG-09", "SHG-16"}
 CHH = {d["id"]: ("Bulk" if d["id"] in bulkset else "Online") for d in D}
-def flows():
-    shg = sum(d["P"] * d["u"] for d in D)
-    log = sum((inbound(d, AC1[d["id"]]) + outbound(d, CHH[d["id"]])) * d["u"] for d in D)
-    val = {d["id"]: (d["P"] + inbound(d, AC1[d["id"]]) + outbound(d, CHH[d["id"]])) * d["u"] for d in D}
-    return shg, log, val
-shg, log, val = flows()
+PACKS = {"SHG-01": 3, "SHG-05": 4}
+def out_h(d):
+    if CHH[d["id"]] == "Bulk": return 10 * d["kg"]
+    if d["id"] in PACKS: n = PACKS[d["id"]]; return courier(n * d["kg"]) / n
+    return courier(d["kg"])
+shg = sum(d["P"] * d["u"] for d in D)
+log = sum((inbound(d, AC1[d["id"]]) + out_h(d)) * d["u"] for d in D)
+b_ = sum(d["P"] * d["u"] for d in D if CHH[d["id"]] == "Bulk") / shg
 O["wc_shg_payout_lakh"] = round(shg / 1e5, 2); O["wc_logistics_lakh"] = round(log / 1e5, 2)
-tot = sum(val.values()); bulkv = sum(v for k, v in val.items() if CHH[k] == "Bulk")
-O["bulk_share_of_value"] = round(bulkv / tot * 100, 1)
+O["bulk_share_of_value"] = round(b_ * 100, 1)
 for n in [30, 60, 90]:
-    O[f"wc_{n}d_lakh"] = round(((tot - bulkv) * 15 / 30 + bulkv * n / 30) / 1e5, 1)
+    O[f"wc_{n}d_lakh"] = round((shg + log) * ((1 - b_) * 15 + b_ * n) / 30 / 1e5, 1)
 
 # ---- gift box 2 (Bijnor): honey SHG-02, brass SHG-03, zari SHG-07
 box = [next(d for d in D if d["id"] == i) for i in ["SHG-02", "SHG-03", "SHG-07"]]
@@ -174,14 +175,3 @@ pilot = ["SHG-16", "SHG-17", "SHG-01", "SHG-05", "SHG-06", "SHG-09", "SHG-02", "
 O["pilot"] = (len(pilot), sum(d["mem"] for d in D if d["id"] in pilot), sum(d["act"] for d in D if d["id"] in pilot))
 print(json.dumps(O, indent=1, ensure_ascii=False, default=str))
 
-# ---- WC re-check with multipacks for jaggery and garam masala in the hybrid
-packs = {"SHG-01": 3, "SHG-05": 4}
-def out_h(d):
-    if CHH[d["id"]] == "Bulk": return 10 * d["kg"]
-    if d["id"] in packs: n = packs[d["id"]]; return courier(n * d["kg"]) / n
-    return courier(d["kg"])
-val2 = {d["id"]: (d["P"] + inbound(d, AC1[d["id"]]) + out_h(d)) * d["u"] for d in D}
-log2 = sum((inbound(d, AC1[d["id"]]) + out_h(d)) * d["u"] for d in D)
-tot2 = sum(val2.values()); bv2 = sum(v for k, v in val2.items() if CHH[k] == "Bulk")
-print("WC2 logistics lakh", round(log2/1e5, 2), "bulk share", round(bv2/tot2*100, 1),
-      [round(((tot2-bv2)*15/30 + bv2*n/30)/1e5, 2) for n in (30, 60, 90)])

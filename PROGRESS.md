@@ -54,7 +54,7 @@ Brief: `PRERNA360_V2_BRIEF.md`; expected values: `context_v2/golden_v2.json`.
   - `tests/golden_v2.test.ts` (29 tests read `golden_v2.json`);
   - e2e: the default plan is SH, 15 → 20, 100% bulk secured gives 20/20, server-rendered `/start`, advanced analysis hidden.
   - Totals: **57 unit, golden and parity tests and 5 e2e tests.**
-- **Known gap between the pack's files:** `recompute_oracle.py` gives a different working capital (₹10.6–17.8 lakh on a value basis) and units per ₹1 lakh (3,418 / 2,392, rounded up) from `golden_v2.json` (₹10.3 / 13.7 / 17.0 lakh; 3,417 / 2,391). The app follows the golden file and the brief §4 formula, which match the deck.
+- Oracle: `context_v2/recompute_oracle.py` (corrected 27 Nov) reproduces `recompute_output.json` and agrees with `golden_v2.json` (working capital ₹10.3 / 13.7 / 17.0 lakh; units per ₹1 lakh 3,417 / 2,391).
 - **P1 not started:**
   - working-capital panel and transfer bridge on `/ac-pnl`;
   - `/pilot` tracker;
