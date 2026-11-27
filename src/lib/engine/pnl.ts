@@ -1,19 +1,9 @@
 import type { AcName } from "./types";
 import type { AcSummary, ScenarioRow } from "./scenarios";
 
-export const VARIABLE_COST_LINES = [
-  "Packaging",
-  "Marketplace commission and payment fees",
-  "Handling labour (variable)",
-  "Damages, returns and RTO",
-] as const;
-export const FIXED_COST_LINES = [
-  "Rent and warehouse",
-  "Salaries",
-  "Utilities",
-  "IT, software and marketplace tools",
-  "Insurance, audit and admin",
-] as const;
+/** Operating-cost audit lines (final submission, slide 5). Collected monthly from Dec 2026. */
+export const FIXED_COST_LINES = ["Rent", "Salaries", "Utilities"] as const;
+export const VARIABLE_COST_LINES = ["Handling and packaging", "Stock losses and returns", "Marketplace fees"] as const;
 
 /** Opex entries in ₹ per month; null = not yet collected. */
 export interface AcOpex {
@@ -43,9 +33,9 @@ export interface AcPnl {
   staffYardstick: number;
 }
 
-const total = (r: Record<string, number | null>) =>
-  Object.values(r).reduce<number>((a, v) => a + (v ?? 0), 0);
-const anyEntered = (r: Record<string, number | null>) => Object.values(r).some((v) => v !== null);
+/** Only the listed audit lines count (older saved keys are ignored). */
+const total = (r: Record<string, number | null>, lines: readonly string[]) => lines.reduce<number>((a, k) => a + (r[k] ?? 0), 0);
+const anyEntered = (r: Record<string, number | null>, lines: readonly string[]) => lines.some((k) => r[k] !== null && r[k] !== undefined);
 
 /**
  * AC P&L for one AC under one scenario. Viability is built on SECURE markup (competitive products only).
@@ -54,10 +44,10 @@ const anyEntered = (r: Record<string, number | null>) => Object.values(r).some((
 export function acPnl(ac: AcName, s: AcSummary, rows: ScenarioRow[], opex: AcOpex | undefined, minWage: number): AcPnl {
   const variable = opex?.variable ?? {};
   const fixed = opex?.fixed ?? {};
-  const variableCosts = total(variable);
+  const variableCosts = total(variable, VARIABLE_COST_LINES);
   const contribution = s.markupSecure - variableCosts;
-  const fixedEntered = anyEntered(fixed);
-  const fixedCosts = fixedEntered ? total(fixed) : null;
+  const fixedEntered = anyEntered(fixed, FIXED_COST_LINES);
+  const fixedCosts = fixedEntered ? total(fixed, FIXED_COST_LINES) : null;
   const secureUnits = rows.filter((r) => r.ac === ac && r.competitive).reduce((a, r) => a + r.units, 0);
   const perUnit = secureUnits > 0 ? contribution / secureUnits : 0;
   return {
@@ -71,7 +61,7 @@ export function acPnl(ac: AcName, s: AcSummary, rows: ScenarioRow[], opex: AcOpe
     markup: s.markup,
     markupSecure: s.markupSecure,
     secureUnits,
-    variableEntered: anyEntered(variable),
+    variableEntered: anyEntered(variable, VARIABLE_COST_LINES),
     variableCosts,
     contribution,
     fixedEntered,

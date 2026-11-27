@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import caseData from "@/data/case-data.json";
 import {
   DEMAND_PRESETS,
+  FIXED_COST_LINES,
   aboveMarketAtZeroMarkup,
   acTransfer,
   acPnl,
@@ -86,8 +87,8 @@ export function useModel() {
     const pnl = (id: ScenarioId, ac: AcName) =>
       acPnl(ac, results[id].summary.byAc[ac], results[id].rows, opex[ac], L.minWageYardstick);
     const opexEntered = {
-      Bijnor: Object.values(opex.Bijnor.fixed).some((v) => v !== null),
-      Lucknow: Object.values(opex.Lucknow.fixed).some((v) => v !== null),
+      Bijnor: FIXED_COST_LINES.some((k) => (opex.Bijnor.fixed[k] ?? null) !== null),
+      Lucknow: FIXED_COST_LINES.some((k) => (opex.Lucknow.fixed[k] ?? null) !== null),
     };
     const headroom = headroomSharing(data, results.S3.rows, L);
     const vol = 1 + L.volumeChange;

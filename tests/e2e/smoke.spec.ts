@@ -40,3 +40,20 @@ test("headroom price rise is hidden by default", async ({ page }) => {
   await expect(page.getByTestId("advanced-analysis")).not.toHaveAttribute("open", "");
   await expect(page.getByText("not part of the recommendation")).toBeVisible();
 });
+
+test("pilot tracker: scope, gates, unresolved working capital", async ({ page }) => {
+  await page.goto("/pilot");
+  await expect(page.getByText("11 SHGs")).toBeVisible();
+  await expect(page.getByText("118 members, 71 earning today")).toBeVisible();
+  await expect(page.getByText("Gate 3 · end-Sep 2027")).toBeVisible();
+  await expect(page.getByText("Unresolved: working capital funding")).toBeVisible();
+});
+
+test("warehouse finances: ₹74,100 transfer and working capital at 30/60 days", async ({ page }) => {
+  await page.goto("/ac-pnl");
+  await expect(page.getByText("Re-linking moves ₹74,100 of gross markup from Bijnor to Lucknow")).toBeVisible();
+  await expect(page.getByTestId("wc-unresolved")).toHaveText("Unresolved: who funds it.");
+  await expect(page.getByTestId("wc-value")).toHaveText("₹10,34,407");
+  await page.getByLabel("Institutional payment days").selectOption("60");
+  await expect(page.getByTestId("wc-value")).toHaveText("₹13,68,928");
+});

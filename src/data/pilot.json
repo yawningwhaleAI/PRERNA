@@ -1,0 +1,98 @@
+{
+  "_source": "context_v2/golden_v2.json (pilot, decisions_for_upsrlm) and context_v2/final_deck.pdf slide 9 (phases, gate timing)",
+  "window": "Feb-Jul 2027, readiness Aug-Sep, go-live Oct 2027",
+  "months": [
+    "Dec 2026",
+    "Jan 2027",
+    "Feb 2027",
+    "Mar 2027",
+    "Apr 2027",
+    "May 2027",
+    "Jun 2027",
+    "Jul 2027",
+    "Aug 2027",
+    "Sep 2027",
+    "Oct 2027"
+  ],
+  "strands": [
+    {
+      "name": "Re-link SHG-16, 17",
+      "owner": "Lucknow AC; State Mission",
+      "months": "Feb-Jul",
+      "proceed_if": "95% on-time dispatch; INR 20/kg billed",
+      "if_not": "Keep at Bijnor; move in capacity order"
+    },
+    {
+      "name": "Multi-pack test",
+      "owner": "Bijnor AC manager",
+      "months": "Feb-Apr",
+      "proceed_if": "Half or more of units still sell",
+      "if_not": "Offer to institutions; report the exposure"
+    },
+    {
+      "name": "Institutional buyers",
+      "owner": "UPSRLM marketing cell",
+      "months": "Feb-Jul",
+      "proceed_if": "3-month orders for half of 1,050 units; paid in 30 days",
+      "if_not": "Stay online; seek state support"
+    },
+    {
+      "name": "Gift-box pre-booking",
+      "owner": "Marketing cell; GDi Partners",
+      "months": "Mar-Jul",
+      "proceed_if": "3 orders with a 30-50% advance by July",
+      "if_not": "Skip 2027; retry with proof"
+    },
+    {
+      "name": "Per-woman pay records",
+      "owner": "DMMs; SHG leaders, federations",
+      "months": "Feb-Jul",
+      "proceed_if": "Records for every new order",
+      "if_not": "Fix the process before scaling"
+    }
+  ],
+  "phases": [
+    {
+      "name": "Both ACs report actual costs",
+      "months": "Dec-Jan"
+    },
+    {
+      "name": "Dry run on full costs",
+      "months": "Aug-Sep"
+    },
+    {
+      "name": "Go-live: ACs pay logistics",
+      "months": "Oct-Oct"
+    }
+  ],
+  "gates": [
+    {
+      "name": "Gate 1",
+      "when": "end-Apr 2027",
+      "strands": [
+        "Multi-pack test"
+      ]
+    },
+    {
+      "name": "Gate 2",
+      "when": "end-Jul 2027",
+      "strands": [
+        "Re-link SHG-16, 17",
+        "Institutional buyers",
+        "Gift-box pre-booking",
+        "Per-woman pay records"
+      ]
+    },
+    {
+      "name": "Gate 3",
+      "when": "end-Sep 2027",
+      "strands": [],
+      "criteria": "Dry run on full costs (Aug-Sep) completed; go / no-go for October 2027"
+    }
+  ],
+  "decisions": [
+    "Re-link SHG-16 and 17 from Feb 2027, subject to Lucknow capacity and federation agreement",
+    "Require monthly actual-cost reporting from both ACs from Dec 2026",
+    "Approve the six-month pilot; unresolved: who funds working capital (INR 10.3-17.0 lakh)"
+  ]
+}

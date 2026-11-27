@@ -282,3 +282,15 @@ describe("v2: social", () => {
     expect(P.shgs.reduce((t: number, id: string) => t + shg(id).active, 0)).toBe(P.earning);
   });
 });
+
+describe("v2: pilot configuration matches golden_v2", () => {
+  const P = JSON.parse(readFileSync("src/data/pilot.json", "utf8"));
+  it("strands, gates, window and decisions", () => {
+    expect(P.strands).toEqual(G.pilot.strands);
+    expect(P.gates.map((g: { when: string }) => g.when)).toEqual(G.pilot.gates);
+    expect(P.window).toBe(G.pilot.window);
+    expect(P.decisions).toEqual(G.decisions_for_upsrlm);
+    const covered = P.gates.flatMap((g: { strands: string[] }) => g.strands);
+    expect(new Set(covered)).toEqual(new Set(G.pilot.strands.map((s: { name: string }) => s.name)));
+  });
+});

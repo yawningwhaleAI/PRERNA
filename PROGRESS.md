@@ -53,14 +53,22 @@ Brief: `PRERNA360_V2_BRIEF.md`; expected values: `context_v2/golden_v2.json`.
 - **Tests:**
   - `tests/golden_v2.test.ts` (29 tests read `golden_v2.json`);
   - e2e: the default plan is SH, 15 → 20, 100% bulk secured gives 20/20, server-rendered `/start`, advanced analysis hidden.
-  - Totals: **57 unit, golden and parity tests and 5 e2e tests.**
+  - Totals: **58 unit, golden and parity tests and 7 e2e tests** (including P1).
 - Oracle: `context_v2/recompute_oracle.py` (corrected 27 Nov) reproduces `recompute_output.json` and agrees with `golden_v2.json` (working capital ₹10.3 / 13.7 / 17.0 lakh; units per ₹1 lakh 3,417 / 2,391).
-- **P1 not started:**
-  - working-capital panel and transfer bridge on `/ac-pnl`;
-  - `/pilot` tracker;
-  - inclusion chart and KPI scorecard;
-  - gift-box presets;
-  - workbook mapping on `/data`.
+- **Live in production since 27 Nov (about 15:00 IST):** v2 P0 at commit `79023fe`, deployment `dpl_aAS6akUMDuds5qFjzgUvABVwEVkf`. It was built from the branch; `main` was not touched. Rollback target for v1: `dpl_FRuqDg1bo4CTr5aQc9sSEPwGMG7A`.
+- **P1-2 done, `/pilot`:**
+  - five strands with owners, a Dec 2026 – Oct 2027 Gantt, proceed-if / if-not criteria, and a status per strand;
+  - three gates with pass/fail stored locally; the gate criteria are the proceed-if tests of the strands ending at that gate, and Gate 3 is the dry run;
+  - scope: 11 SHGs, 118 members, 71 earning;
+  - three decisions, with decision 3 flagged "Unresolved: working capital funding".
+  - Config is in `src/data/pilot.json`, tested against golden_v2.
+- **P1-1 done, `/ac-pnl`:**
+  - ₹74,100 transfer bridge with units and kg;
+  - units-per-₹1-lakh yardstick (3,417 / 2,391);
+  - Bijnor transition plan and Lucknow capacity check;
+  - working-capital panel (online days input, institutional 30/60/90 days, "Unresolved: who funds it");
+  - operating-cost audit with the deck's six lines. The engine only sums those lines.
+- **P1 not started:** P1-3 inclusion screens and KPI scorecard, P1-4 gift-box presets, P1-5 workbook mapping on `/data`.
 
 ## Plain-language pass (for Prerna staff)
 - Plans renamed: Today (S0) · Fix links (S1) · Fix channels (S2) · Fix both, recommended (S3); a banner on plan-driven pages says which plan is shown and what it changes.

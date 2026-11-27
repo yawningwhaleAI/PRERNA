@@ -4,9 +4,10 @@ _Written 26 Nov 2026; updated 27 Nov 2026 for v2. Read this first, then `CLAUDE.
 
 > **v2 status (27 Nov):** branch **`claude/v2-hybrid`** (from `claude/sleepy-cannon-ebzzjh`) holds P0 of the v2 brief.
 > - The recommended plan is now **SH, the buyer-backed hybrid**; S3 is "all staples to bulk".
-> - It is deployed as a Vercel **preview** only.
-> - **Production (the deck's QR code) still serves the v1 commit `469f261`.** Do not merge to `main` or promote to production until the user says so.
-> - The P0 details are in `PROGRESS.md`. P1 and P2 have not started.
+> - **v2 P0 is in production** (`dpl_aAS6akUMDuds5qFjzgUvABVwEVkf`, commit `79023fe`), built from the branch with `main` untouched.
+> - Roll back to v1 with `vercel rollback dpl_FRuqDg1bo4CTr5aQc9sSEPwGMG7A --scope yawningwhaleais-projects`.
+> - P1-1 (`/ac-pnl`) and P1-2 (`/pilot`) are on the branch as a **preview**; promote only on the user's OK.
+> - P1-3 to P1-5 and P2 have not started. Never merge to `main` without asking: pushes to `main` deploy to production automatically.
 
 
 ## 1. What this is

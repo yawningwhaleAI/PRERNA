@@ -45,6 +45,10 @@ interface OpexPaise {
   fixed: Record<string, number | null>;
 }
 
+export const PILOT_STATUSES = ["Not started", "On track", "At risk", "Passed", "Failed"] as const;
+export type PilotStatus = (typeof PILOT_STATUSES)[number];
+export type GateResult = "Pass" | "Fail" | "Not decided";
+
 export interface AppState {
   scenario: ScenarioId;
   levers: Levers;
@@ -55,6 +59,8 @@ export interface AppState {
   boxes: Box[];
   commitments: Commitment[];
   useCommitted: boolean;
+  pilotStatus: Record<string, PilotStatus>;
+  gateResult: Record<string, GateResult>;
 }
 
 /** The three boxes from the analysis (Corporate Boxes sheet). Illustrative, labelled as such. */
@@ -76,6 +82,8 @@ export const INITIAL_STATE: AppState = {
   boxes: SEED_BOXES,
   commitments: [],
   useCommitted: false,
+  pilotStatus: {},
+  gateResult: {},
 };
 
 const KEY = "prerna360:v2";
