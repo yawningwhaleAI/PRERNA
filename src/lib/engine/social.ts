@@ -173,3 +173,16 @@ export function socialAnalysis(data: CaseData, levers: Levers): { rows: ShgSocia
     },
   };
 }
+
+/** SHGs ranked by share of members earning (lowest first; ties by SHG id). */
+export function lowestParticipation(data: CaseData, n = 10) {
+  return data.shgs
+    .map((s) => ({ shgId: s.id, product: s.product, active: s.active, members: s.members, participation: s.active / s.members, incomePerEarner: (s.shgProfit * s.units) / s.active }))
+    .sort((a, b) => a.participation - b.participation || a.shgId.localeCompare(b.shgId))
+    .slice(0, n);
+}
+
+/** Number of SHGs where fewer than `target` of members earn. */
+export function shgsBelowParticipation(data: CaseData, target: number): number {
+  return data.shgs.filter((s) => s.active / s.members < target).length;
+}

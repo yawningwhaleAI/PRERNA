@@ -15,6 +15,8 @@ export const DEFAULT_LEVERS: Levers = {
   prernaStores: 543,
   minWageYardstick: 13190,
   lakhpatiMonthly: 10000,
+  packAcceptance: 0.75,
+  bulkSecured: 0,
 };
 
 export interface LeverMeta {
@@ -26,6 +28,8 @@ export interface LeverMeta {
 }
 
 export const LEVER_META: LeverMeta[] = [
+  { key: "packAcceptance", label: "Share of jaggery and garam masala buyers who accept multi-packs", unit: "pct", assumption: true, note: "Hybrid plan. Illustrative 75%; to be tested in the multi-pack pilot." },
+  { key: "bulkSecured", label: "Share of atta, detergent and mustard oil volume with a committed bulk buyer", unit: "pct", assumption: true, note: "Hybrid plan. Starts at 0%; confirmed orders in Buyers & gift boxes raise it automatically." },
   { key: "inboundRateChange", label: "Change in transport rates to the warehouse", unit: "pct", assumption: false, note: "Test what happens if trucking to the warehouse gets dearer. 0% = case rates." },
   { key: "outboundRateChange", label: "Change in courier and truck rates to buyers", unit: "pct", assumption: false, note: "Test what happens if delivery gets dearer. 0% = case rates." },
   { key: "volumeChange", label: "Change in units sold", unit: "pct", assumption: false, note: "Test a drop or rise in sales. 0% = case volumes." },

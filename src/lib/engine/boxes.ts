@@ -177,3 +177,17 @@ export function capacityCheck(
   const binding = lines.length ? lines.reduce((a, b) => (b.monthsOfOutput > a.monthsOfOutput ? b : a)) : null;
   return { lines, ok: lines.every((l) => l.ok), binding };
 }
+
+/** The same contents bought as separate single-unit online orders (one courier parcel each, no gift packaging). */
+export function boxAsOnlineOrders(data: CaseData, items: BoxItemInput[], plan: Plan, levers: Levers): number {
+  const card = data.rateCard;
+  const inMult = 1 + levers.inboundRateChange;
+  const outMult = 1 + levers.outboundRateChange;
+  return items.reduce((t, it) => {
+    const s = data.shgs.find((x) => x.id === it.shgId);
+    const a = plan[it.shgId];
+    if (!s || !a) return t;
+    const inb = inboundCost(s.weight, distanceTo(s, a.ac), card, { edgeInclusive: levers.edgeInclusive, inMult });
+    return t + (s.shgPrice + inb + card.markup * s.shgPrice + outboundCost(s.weight, "Online", card, outMult)) * it.qty;
+  }, 0);
+}

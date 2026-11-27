@@ -1,0 +1,6 @@
+{
+  "_source": "context_v2/golden_v2.json → channels.hybrid_channels (final GDi Partners submission, demand-backed hybrid)",
+  "packs": { "SHG-01": 3, "SHG-05": 4 },
+  "needsBuyer": ["SHG-06", "SHG-09", "SHG-16"],
+  "pilotShgs": ["SHG-16", "SHG-17", "SHG-01", "SHG-05", "SHG-06", "SHG-09", "SHG-02", "SHG-03", "SHG-07", "SHG-14", "SHG-20"]
+}

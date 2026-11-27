@@ -1,0 +1,422 @@
+{
+ "_note": "Golden values for Prerna 360 v2. Source: final submission workbook (Summary sheet) and context_v2/recompute_oracle.py run on the unchanged case dataset. Money = INR per month unless stated.",
+ "today": {
+  "competitive": 10,
+  "markup_total": 219300,
+  "markup_at_risk": 93600,
+  "markup_at_risk_gt5pct": 42900,
+  "markup_at_risk_0to5pct": 50700,
+  "income_at_risk": 75400,
+  "income_at_risk_gt5pct": 35500,
+  "income_at_risk_0to5pct": 39900,
+  "women_in_uncompetitive_shgs": 69,
+  "all_uncompetitive_sold_online": true,
+  "bulk_products_competitive": 3
+ },
+ "relink_floor": {
+  "shgs_relinked": [
+   "SHG-11",
+   "SHG-12",
+   "SHG-13",
+   "SHG-14",
+   "SHG-15",
+   "SHG-16",
+   "SHG-17"
+  ],
+  "inbound_saving": 42400,
+  "saving_by_shg": {
+   "SHG-16": 15000,
+   "SHG-17": 14000,
+   "SHG-12": 5000,
+   "SHG-11": 3000,
+   "SHG-14": 2400,
+   "SHG-15": 2400,
+   "SHG-13": 600
+  },
+  "shg16_17_saving": 29000,
+  "shg16_17_share": 0.684,
+  "shg16_17_kg": 1450,
+  "competitive": 15,
+  "markup_at_risk": 42900,
+  "income_at_risk": 35500,
+  "women_at_risk": 41,
+  "still_uncompetitive": [
+   "Jaggery",
+   "Garam masala",
+   "Detergent",
+   "Mustard oil",
+   "Multigrain atta"
+  ],
+  "above_market_even_at_zero_markup": {
+   "Garam masala": [
+    135,
+    120
+   ],
+   "Detergent": [
+    275,
+    260
+   ],
+   "Multigrain atta": [
+    490,
+    440
+   ]
+  },
+  "courier_share_of_shg_price": {
+   "Garam masala": 0.625,
+   "Detergent": 0.469,
+   "Multigrain atta": 0.625
+  },
+  "shg19_note": "Jhansi: 500 km Bijnor, 320 km Lucknow, both INR 30 band, so it stays"
+ },
+ "ac_impact_after_relink": {
+  "bijnor_markup": [
+   157500,
+   83400
+  ],
+  "lucknow_markup": [
+   61800,
+   135900
+  ],
+  "markup_moved": 74100,
+  "bijnor_units": [
+   4460,
+   2850
+  ],
+  "lucknow_units": [
+   1640,
+   3250
+  ],
+  "bijnor_kg": [
+   4520,
+   2400
+  ],
+  "lucknow_kg": [
+   1370,
+   3490
+  ],
+  "markup_per_unit_after": {
+   "Bijnor": 29.26,
+   "Lucknow": 41.82
+  },
+  "units_per_1_lakh_fixed_cost": {
+   "Bijnor": 3417,
+   "Lucknow": 2391
+  },
+  "lucknow_units_change": 0.982,
+  "lucknow_kg_change": 1.547,
+  "bijnor_markup_change": -0.47
+ },
+ "channels": {
+  "online_units_today": 4650,
+  "bulk_units_today": 1450,
+  "blanket_bulk_new_units": 2250,
+  "blanket_bulk_share_of_online": 0.484,
+  "blanket_bulk_per_store": 4.1,
+  "hybrid_new_bulk_units": 1050,
+  "hybrid_share_of_online": 0.226,
+  "hybrid_per_store": 1.9,
+  "prerna_saras_stores": 543,
+  "hybrid_channels": {
+   "SHG-01": "online multi-pack x3",
+   "SHG-05": "online multi-pack x4",
+   "SHG-06": "bulk after buyer commits",
+   "SHG-09": "bulk after buyer commits",
+   "SHG-16": "bulk after buyer commits",
+   "SHG-04,10,18": "bulk (unchanged)",
+   "others": "online single unit"
+  },
+  "jaggery_3pack_sp": 158.33,
+  "jaggery_3pack_sp_freight_plus10": 162.67,
+  "jaggery_market": 160,
+  "garam_masala_4pack_sp": 115.75,
+  "garam_masala_4pack_sp_freight_plus10": 118.13,
+  "garam_masala_market": 120,
+  "reseller_margin_at_market": {
+   "Multigrain atta": 0.032,
+   "Detergent": 0.062,
+   "Mustard oil": 0.073
+  }
+ },
+ "demand_scenarios_hybrid": {
+  "rule": "Product counts competitive only if all its volume sells at or below market. Unsecured bulk stays online, above market. Pack decliners are lost volume.",
+  "no_bulk_buyer_yet": {
+   "pack_acceptance": 0.75,
+   "bulk_secured": 0.0,
+   "competitive": 17,
+   "markup_secured": 188325,
+   "income_at_risk": 22500,
+   "income_lost_packs_declined": 3250,
+   "women_exposed": 23
+  },
+  "base_case_illustrative": {
+   "pack_acceptance": 0.75,
+   "bulk_secured": 0.5,
+   "competitive": 17,
+   "markup_secured": 201825,
+   "income_at_risk": 11250,
+   "income_lost_packs_declined": 3250,
+   "women_exposed": 23
+  },
+  "all_buyers_commit": {
+   "pack_acceptance": 1.0,
+   "bulk_secured": 1.0,
+   "competitive": 20,
+   "markup_secured": 219300,
+   "income_at_risk": 0,
+   "income_lost_packs_declined": 0,
+   "women_exposed": 0
+  }
+ },
+ "demand_scenarios_blanket_bulk": {
+  "bulk_secured": [
+   0,
+   0.25,
+   0.5,
+   0.75,
+   1.0
+  ],
+  "competitive": [
+   15,
+   15,
+   15,
+   15,
+   20
+  ],
+  "markup_secured": [
+   176400,
+   187125,
+   197850,
+   208575,
+   219300
+  ],
+  "income_at_risk": [
+   35500,
+   26625,
+   17750,
+   8875,
+   0
+  ]
+ },
+ "working_capital_hybrid": {
+  "shg_payouts": 1462000,
+  "logistics": 272292,
+  "bulk_share_of_value_shg_price_basis": 0.193,
+  "online_payment_days": 15,
+  "wc_30_60_90_days": [
+   1034407,
+   1368928,
+   1703449
+  ],
+  "display_lakh": [
+   10.3,
+   13.7,
+   17.0
+  ],
+  "pilot_institutional_payout": 180000,
+  "formula": "(payouts + logistics) * ((1 - b) * online_days + b * institutional_days) / 30, b = bulk share of value at SHG price"
+ },
+ "gift_box_2_bijnor": {
+  "contents": [
+   "SHG-02 honey 500 g",
+   "SHG-03 brass diya set",
+   "SHG-07 zari clutch"
+  ],
+  "kg": 2.0,
+  "sp_truck": 2615,
+  "build": {
+   "shg_price": 2200,
+   "inbound": 25,
+   "markup": 330,
+   "packaging": 40,
+   "truck": 20
+  },
+  "as_three_online_orders": 2705,
+  "market": 3150,
+  "below_market": 0.17,
+  "shg_profit_per_box": 275,
+  "ac_markup_per_box": 330,
+  "binding_capacity": "brass diya and zari: 100 units/month each, so 100 boxes = 1 month of output",
+  "order_size_default": 100
+ },
+ "social": {
+  "members": 213,
+  "earning": 127,
+  "not_earning": 86,
+  "earning_share": 0.596,
+  "median_income_per_earner": 1050,
+  "top20_share": 0.4885,
+  "gini_earners": 0.4239,
+  "gini_all_members": 0.6565,
+  "corr_participation_vs_income": -0.74,
+  "craft_share_earning": 0.347,
+  "other_share_earning": 0.723,
+  "shgs_below_80pct": 15,
+  "additional_earners_for_80pct": 50,
+  "additional_units_for_80pct": 1679,
+  "additional_units_pct": 0.275,
+  "lowest_participation": [
+   [
+    "Banarasi silk saree",
+    "SHG-13",
+    2,
+    10,
+    7500
+   ],
+   [
+    "Brass diya set",
+    "SHG-03",
+    3,
+    10,
+    3333
+   ],
+   [
+    "Terracotta horse",
+    "SHG-15",
+    3,
+    10,
+    2400
+   ],
+   [
+    "Zari clutch",
+    "SHG-07",
+    4,
+    10,
+    3750
+   ],
+   [
+    "Wooden toy set",
+    "SHG-14",
+    4,
+    10,
+    1800
+   ],
+   [
+    "Soft toy",
+    "SHG-20",
+    4,
+    10,
+    1750
+   ],
+   [
+    "Chikankari kurta",
+    "SHG-08",
+    5,
+    12,
+    5250
+   ],
+   [
+    "Honey (Bijnor)",
+    "SHG-02",
+    5,
+    10,
+    1500
+   ],
+   [
+    "Honey (Sitapur)",
+    "SHG-11",
+    5,
+    10,
+    1500
+   ],
+   [
+    "Ghee",
+    "SHG-19",
+    6,
+    11,
+    1875
+   ]
+  ]
+ },
+ "pilot": {
+  "window": "Feb-Jul 2027, readiness Aug-Sep, go-live Oct 2027",
+  "gates": [
+   "end-Apr 2027",
+   "end-Jul 2027",
+   "end-Sep 2027"
+  ],
+  "shgs": [
+   "SHG-16",
+   "SHG-17",
+   "SHG-01",
+   "SHG-05",
+   "SHG-06",
+   "SHG-09",
+   "SHG-02",
+   "SHG-03",
+   "SHG-07",
+   "SHG-14",
+   "SHG-20"
+  ],
+  "members": 118,
+  "earning": 71,
+  "strands": [
+   {
+    "name": "Re-link SHG-16, 17",
+    "owner": "Lucknow AC; State Mission",
+    "months": "Feb-Jul",
+    "proceed_if": "95% on-time dispatch; INR 20/kg billed",
+    "if_not": "Keep at Bijnor; move in capacity order"
+   },
+   {
+    "name": "Multi-pack test",
+    "owner": "Bijnor AC manager",
+    "months": "Feb-Apr",
+    "proceed_if": "Half or more of units still sell",
+    "if_not": "Offer to institutions; report the exposure"
+   },
+   {
+    "name": "Institutional buyers",
+    "owner": "UPSRLM marketing cell",
+    "months": "Feb-Jul",
+    "proceed_if": "3-month orders for half of 1,050 units; paid in 30 days",
+    "if_not": "Stay online; seek state support"
+   },
+   {
+    "name": "Gift-box pre-booking",
+    "owner": "Marketing cell; GDi Partners",
+    "months": "Mar-Jul",
+    "proceed_if": "3 orders with a 30-50% advance by July",
+    "if_not": "Skip 2027; retry with proof"
+   },
+   {
+    "name": "Per-woman pay records",
+    "owner": "DMMs; SHG leaders, federations",
+    "months": "Feb-Jul",
+    "proceed_if": "Records for every new order",
+    "if_not": "Fix the process before scaling"
+   }
+  ]
+ },
+ "kpis": [
+  {
+   "kpi": "Income per earning woman, median (INR/month)",
+   "current": 1050,
+   "target": "No fall"
+  },
+  {
+   "kpi": "AC orders with per-woman pay records",
+   "current": "Not tracked",
+   "target": "100%"
+  },
+  {
+   "kpi": "On-time fulfilment of pilot orders",
+   "current": "Not measured",
+   "target": "95%"
+  },
+  {
+   "kpi": "Repeat pilot buyers",
+   "current": "Not measured",
+   "target": "2 of 3"
+  },
+  {
+   "kpi": "% members earning per SHG (aspiration, agreed SHG by SHG, never mandated)",
+   "current": 0.596,
+   "target": "80%"
+  }
+ ],
+ "decisions_for_upsrlm": [
+  "Re-link SHG-16 and 17 from Feb 2027, subject to Lucknow capacity and federation agreement",
+  "Require monthly actual-cost reporting from both ACs from Dec 2026",
+  "Approve the six-month pilot; unresolved: who funds working capital (INR 10.3-17.0 lakh)"
+ ]
+}

@@ -1,7 +1,10 @@
 import { allocate } from "./allocation";
 import { channelRule, channelSwitchOnly } from "./channel";
 import { sellingPrice, type PriceOptions } from "./pricing";
-import type { AcName, CaseData, Levers, Plan, ScenarioId, ShgRecord } from "./types";
+import type { AcName, CaseData, HybridConfig, Levers, Plan, ScenarioId, ShgRecord } from "./types";
+import hybridPlan from "../../data/hybrid-plan.json";
+
+export const DEFAULT_HYBRID: HybridConfig = { packs: hybridPlan.packs as Record<string, number>, needsBuyer: hybridPlan.needsBuyer, pilotShgs: hybridPlan.pilotShgs };
 
 export interface ScenarioInfo {
   id: ScenarioId;
@@ -13,14 +16,18 @@ export interface ScenarioInfo {
   what: string;
   /** Kept for reference to the analysis and the Excel workbook. */
   label: string;
+  recommended?: boolean;
 }
 
 export const SCENARIOS: ScenarioInfo[] = [
   { id: "S0", name: "Today's setup", short: "Today", label: "S0 baseline", what: "Nothing changes: same warehouses, same sales channels. Transport is now added to the price (from Oct 2027)." },
-  { id: "S1", name: "Fix warehouse links", short: "Fix links", label: "S1 re-link", what: "SHGs that send goods to a far-away warehouse switch to the one with cheaper transport. Products are sold the same way as today." },
-  { id: "S2", name: "Fix sales channels", short: "Fix channels", label: "S2 channel", what: "Products that are too expensive online are sold in bulk (Prerna stores, canteens, institutions) instead. Warehouses stay as today." },
-  { id: "S3", name: "Fix both (recommended)", short: "Fix both", label: "S3 re-link + channel", what: "Each SHG uses the warehouse with cheaper transport, then each product is sold online or in bulk, whichever keeps it at or below market price." },
+  { id: "S1", name: "Fix links (floor)", short: "Fix links", label: "S1 re-link", what: "7 SHGs that send goods to a far-away warehouse switch to Lucknow, where transport is cheaper. No new buyers needed. Products are sold as today." },
+  { id: "S2", name: "Fix sales channels", short: "Fix channels", label: "S2 channel", what: "Products too expensive online are sold in bulk instead. Warehouses stay as today." },
+  { id: "S3", name: "Fix links + all staples to bulk", short: "All staples to bulk", label: "S3 re-link + blanket bulk", what: "Re-link 7 SHGs and move all five failing staples to bulk (2,250 units a month need bulk buyers)." },
+  { id: "SH", name: "Fix links + buyer-backed hybrid (recommended)", short: "Hybrid", label: "SH demand-backed hybrid", recommended: true, what: "Re-link 7 SHGs; jaggery and garam masala online as multi-packs; atta, detergent and mustard oil to bulk only when a buyer commits." },
 ];
+
+export const RECOMMENDED_PLAN: ScenarioId = "SH";
 
 export interface RunOptions {
   inMult: number;
@@ -49,6 +56,7 @@ export function buildPlan(
   data: CaseData,
   levers: Levers,
   acOverrides: Record<string, AcName> = {},
+  hybrid: HybridConfig = DEFAULT_HYBRID,
 ): Plan {
   const o = runOptions(levers);
   const plan: Plan = {};
@@ -68,6 +76,14 @@ export function buildPlan(
       case "S3": {
         const ac = hubAc();
         plan[s.id] = { ac, channel: channelRule(s, ac, data.rateCard, priceOpts(o)).channel };
+        break;
+      }
+      case "SH": {
+        const ac = hubAc();
+        const pack = hybrid.packs[s.id];
+        if (pack) plan[s.id] = { ac, channel: "Online", unitsPerParcel: pack };
+        else if (hybrid.needsBuyer.includes(s.id)) plan[s.id] = { ac, channel: "Bulk", needsBuyer: true };
+        else plan[s.id] = { ac, channel: s.channel };
         break;
       }
     }

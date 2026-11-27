@@ -70,15 +70,30 @@ export interface Levers {
   prernaStores: number;
   minWageYardstick: number;
   lakhpatiMonthly: number;
+  /** Hybrid plan: share of multi-pack volume buyers accept (0..1). Assumption. */
+  packAcceptance: number;
+  /** Hybrid plan: share of needs-buyer bulk volume with a buyer commitment (0..1), set by hand. The order book can raise it. */
+  bulkSecured: number;
 }
 
-export type ScenarioId = "S0" | "S1" | "S2" | "S3";
+/** Demand-backed hybrid configuration (final submission). */
+export interface HybridConfig {
+  /** Units per online multi-pack, by SHG. */
+  packs: Record<string, number>;
+  /** Products that move to institutional bulk only once a buyer commits. */
+  needsBuyer: string[];
+  pilotShgs: string[];
+}
+
+export type ScenarioId = "S0" | "S1" | "S2" | "S3" | "SH";
 
 export interface Assignment {
   ac: AcName;
   channel: Channel;
-  /** Units per online parcel (hamper scenario only; 1 otherwise). */
+  /** Units per online parcel (hamper or multi-pack; 1 otherwise). */
   unitsPerParcel?: number;
+  /** Hybrid plan: this bulk move only counts once a buyer commits. */
+  needsBuyer?: boolean;
 }
 
 export type Plan = Record<string, Assignment>;
